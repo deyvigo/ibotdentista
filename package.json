@@ -1,0 +1,27 @@
+{
+  "name": "ibotdentista",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc-init": "tsc --init",
+    "dev": "ts-node ./src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "dotenv": "^16.4.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "@hapi/boom": "^10.0.1",
+    "@whiskeysockets/baileys": "^6.7.7",
+    "canvas": "^2.11.2",
+    "mysql2": "^3.11.0",
+    "openai": "^4.57.3",
+    "qrcode-terminal": "^0.12.0"
+  }
+}
