@@ -3,6 +3,7 @@ import { Boom } from '@hapi/boom'
 import { createDatabase } from './services/connection'
 
 import 'dotenv/config'
+import { mainFlow } from './flows/main'
 
 // Create database
 createDatabase()
@@ -30,38 +31,22 @@ const connectToWhatsApp = async () => {
       }
     }
 
-    socket.ev.on('creds.update', saveCreds)
+  })
 
-    socket.ev.on('messages.upsert', async (messageUpdate) => {
-      // Si los mensajes son reacciones
-      if (messageUpdate.messages[0].message?.reactionMessage) {
-        return
-      }
-      // console.log(messageUpdate.messages[0])
-      const message = messageUpdate.messages[0]
+  socket.ev.on('creds.update', saveCreds)
 
-      // Verificar si el mensaje es del propio bot
-      if (message.key.fromMe) return
-  
-      // mainFlow(sock, message)
-      
-      const from = message.key.remoteJid
-      const receiver = messageUpdate.messages[0].key.remoteJid?.split('@')[0]
-  
-      const doctors = []
-  
-      if (receiver === '51968415578') {
-        if (!message.key.fromMe) {
-          await socket.sendMessage(from!, { text: `Hola jefe ${receiver}` })
-        }
-        return
-      }
-  
-      if (!message.key.fromMe) {
-        await socket.sendMessage(from!, { text: `Hello ${receiver}` })
-        await socket.sendMessage(from!, { text: `Hello 2 ${receiver}` })
-      }
-    })
+  socket.ev.on('messages.upsert', async (messageUpdate) => {
+    // Si los mensajes son reacciones
+    if (messageUpdate.messages[0].message?.reactionMessage) {
+      return
+    }
+    // console.log(messageUpdate.messages[0])
+    const message = messageUpdate.messages[0]
+
+    // Verificar si el mensaje es del propio bot
+    if (message.key.fromMe) return
+
+    mainFlow(socket, message)
   })
 }
 
