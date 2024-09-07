@@ -1,17 +1,19 @@
 import { WASocket, proto } from '@whiskeysockets/baileys'
 import { DoctorRepository } from '../repositories/doctor'
+import { mainFlowClient } from './client/main'
+import { mainFlowDoctor } from './doctor/main'
 
-export const mainFlow = async (socket: WASocket, message: proto.IWebMessageInfo) => {
-  const from = message.key.remoteJid
-  const receiver = message.key.remoteJid?.split('@')[0]
+export const mainFlow = async (socket: WASocket, messageInfo: proto.IWebMessageInfo) => {
+  const from = messageInfo.key.remoteJid
+  const receiver = from?.split('@')[0]
   const rows = await DoctorRepository.getDoctors()
 
   const doctors = rows.map(row => row.phone)
 
   if (doctors.includes(receiver!)) {
-    await socket.sendMessage(from!, { text: `Hola jefe ${receiver}` })
+    mainFlowDoctor(socket, messageInfo)
     return
   }
 
-  await socket.sendMessage(from!, { text: `No eres doctor ${receiver}` })
+  mainFlowClient(socket, messageInfo)
 }
