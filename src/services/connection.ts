@@ -86,6 +86,18 @@ export const createDatabase = async () => {
         foreign key (id_doctor) references doctor (id_doctor)
     );
   `
+  const queryPayment = `
+    create table if not exists payment
+    (
+      id_payment  uuid   not null
+        primary key,
+      amount      double not null,
+      description uuid   null,
+      id_doctor   uuid   not null,
+      constraint payment_doctor_id_doctor_fk
+        foreign key (id_doctor) references doctor (id_doctor)
+    );
+  `
 
   try {
     await dbConnection.query(queryClient)
@@ -94,6 +106,7 @@ export const createDatabase = async () => {
     await dbConnection.query(queryBlockTime)
     await dbConnection.query(querySchedule)
     await dbConnection.query(queryService)
+    await dbConnection.query(queryPayment)
     console.log('Base de datos creada exitosamente')
   } catch (error) {
     console.log('Error al crear la base de datos: ', error)
