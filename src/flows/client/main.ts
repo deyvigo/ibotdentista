@@ -3,6 +3,7 @@ import { Session, ClientFlow } from '../../interfaces/session.interface'
 import { askToAI } from '../../services/ai'
 import { welcomeClient } from './welcome'
 import { services } from './service'
+import { doctorSchedule } from './doctorSchedule'
 
 const userSession = new Map<string, Session>()
 
@@ -47,6 +48,7 @@ export const mainFlowClient = async (socket: WASocket, messageInfo: proto.IWebMe
       services(socket, messageInfo)
       break
     case 'horario-doctor':
+      doctorSchedule(socket, messageInfo)
       break
     case 'consultas':
       break
