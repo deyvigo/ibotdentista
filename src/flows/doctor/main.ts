@@ -1,6 +1,9 @@
 import { proto, WASocket } from '@whiskeysockets/baileys'
 import { Session, DoctorFlow } from '../../interfaces/session.interface'
 import { askToAI } from '../../services/ai'
+import { welcomeDoctor } from './welcome'
+import { consultation } from './consultations'
+import { scheduleDoctor } from './schedule'
 
 const userSessions = new Map<string, Session>()
 
@@ -33,10 +36,14 @@ export const mainFlowDoctor = async (socket: WASocket, messageInfo: proto.IWebMe
     session.flow = (await askToAI(prompt) as string).trim() as DoctorFlow
   }
 
+  console.log('session.flow:', session.flow)
+
   switch (session.flow) {
     case 'saludo':
+      await welcomeDoctor(socket, messageInfo)
       break
     case 'horario':
+      scheduleDoctor(socket, messageInfo)
       break
     case 'citas':
       break
@@ -45,6 +52,7 @@ export const mainFlowDoctor = async (socket: WASocket, messageInfo: proto.IWebMe
     case 'servicios':
       break
     case 'consultas':
+      await consultation(socket, messageInfo)
       break
   }
 
