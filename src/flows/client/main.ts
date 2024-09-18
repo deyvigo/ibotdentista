@@ -1,6 +1,7 @@
 import { WASocket, proto } from '@whiskeysockets/baileys'
 import { Session, ClientFlow } from '../../interfaces/session.interface'
 import { askToAI } from '../../services/ai'
+import { welcomeClient } from './welcome'
 
 const userSession = new Map<string, Session>()
 
@@ -12,7 +13,7 @@ export const mainFlowClient = async (socket: WASocket, messageInfo: proto.IWebMe
   Eres un asistente chatbot de un dentista.
   Tus respuestas son cortas y concisas.
   Tienes una lista de acciones disponibles para el usuario:
-  - saludo: para saludar al usuario
+  - bienvenida: para saludar al usuario o recibir agradecimientos
   - servicios: para listar los servicios disponibles por el consultorio dentista
   - horario-doctor: para solicitar el horario de trabajo de un doctor
   - consultas: para realizar consultas sobre odontología
@@ -21,10 +22,10 @@ export const mainFlowClient = async (socket: WASocket, messageInfo: proto.IWebMe
   - citas-creadas: para ver las citas que el usuario ha realizado
   Este es el mensaje del usuario: ${messageText}
   Debes responder solo la accion que el usuario quiere realizar.
-  Si el mensaje del usuario es un saludo, responde con la accion saludo.
-  Si el mensaje del usuario no tiene relación con el servicio dental, responde con la accion saludo.
-  La accion saludo es la de menor prioridad.
-  Respuesta ideal: (saludo|servicios|horario-doctor|consultas|solicitar-cita|cancelar-cita|citas-creadas)
+  Si el mensaje del usuario es un saludo, responde con la accion bienvenida.
+  Si el mensaje del usuario no tiene relación con el servicio dental, responde con la accion bienvenida.
+  La accion bienvenida es la de menor prioridad.
+  Respuesta ideal: (bienvenida|servicios|horario-doctor|consultas|solicitar-cita|cancelar-cita|citas-creadas)
   `
 
   // obtain user session
@@ -38,7 +39,8 @@ export const mainFlowClient = async (socket: WASocket, messageInfo: proto.IWebMe
   console.log('session.flow: ', session.flow)
 
   switch (session.flow) {
-    case 'saludo':
+    case 'bienvenida':
+      welcomeClient(socket, messageInfo)
       break
     case 'servicios':
       break

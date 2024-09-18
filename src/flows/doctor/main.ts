@@ -15,7 +15,7 @@ export const mainFlowDoctor = async (socket: WASocket, messageInfo: proto.IWebMe
   Eres un asistente chatbot de un dentista.
   Tus respuestas son cortas y concisas.
   Tienes una lista de acciones disponibles para el dentista:
-  - saludo: para saludar al usuario
+  - bienvenida: para saludar al usuario o recibir agradecimientos
   - horario: para solicitar el horario de trabajo del doctor
   - citas: para ver las citas que tiene que atender el dentista
   - cancelar: para cancelar citas
@@ -23,10 +23,10 @@ export const mainFlowDoctor = async (socket: WASocket, messageInfo: proto.IWebMe
   - consultas: para realizar consultas sobre odontología
   Este es el mensaje del dentista: ${messageText}
   Debes responder solo la accion que el dentista quiere realizar.
-  Si el mensaje del dentista es un saludo, responde con la accion saludo.
-  Si el mensaje del dentista no tiene relación con el servicio dental, responde con la accion saludo.
-  La accion saludo es la de menor prioridad.
-  Respuesta ideal: (saludo|horario|citas|cancelar|consultas)
+  Si el mensaje del dentista es un saludo, responde con la accion bienvenida.
+  Si el mensaje del dentista no tiene relación con el servicio dental, responde con la accion bienvenida.
+  La accion bienvenida es la de menor prioridad.
+  Respuesta ideal: (bienvenida|horario|citas|cancelar|consultas)
   `
 
   // obtain user session
@@ -39,7 +39,7 @@ export const mainFlowDoctor = async (socket: WASocket, messageInfo: proto.IWebMe
   console.log('session.flow:', session.flow)
 
   switch (session.flow) {
-    case 'saludo':
+    case 'bienvenida':
       await welcomeDoctor(socket, messageInfo)
       break
     case 'horario':

@@ -11,9 +11,9 @@ export const mainFlow = async (socket: WASocket, messageInfo: proto.IWebMessageI
   const doctors = rows.map(row => row.phone)
 
   if (doctors.includes(receiver!)) {
-    mainFlowDoctor(socket, messageInfo)
+    await mainFlowDoctor(socket, messageInfo)
     return
   }
 
-  mainFlowClient(socket, messageInfo)
+  await mainFlowClient(socket, messageInfo)
 }

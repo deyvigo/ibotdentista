@@ -23,6 +23,6 @@ export interface SessionDoctorService {
   price: number
 }
 
-export type DoctorFlow = 'saludo' | 'horario' | 'citas' | 'cancelar' | 'consultas' | 'servicios'
+export type DoctorFlow = 'bienvenida' | 'horario' | 'citas' | 'cancelar' | 'consultas' | 'servicios'
 
-export type ClientFlow = 'saludo' | 'servicios' | 'horario-doctor' | 'consultas' | 'solicitar-cita' | 'cancelar-cita' | 'citas-creadas'
+export type ClientFlow = 'bienvenida' | 'servicios' | 'horario-doctor' | 'consultas' | 'solicitar-cita' | 'cancelar-cita' | 'citas-creadas'
