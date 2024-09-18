@@ -1,5 +1,5 @@
-type DateState = 'ocupado' | 'por atender' | 'atendido'
+export type DateState = 'occupied' | 'pending' | 'attended'
 
-// ocupado = no disponible. Para separar los horarios que quiere tomarse libre el doctor
-// por atender = estodo para cuando el cliente agenda una cita
-// atendido = estodo para cuando el doctor atiende una cita
+// occupied = no disponible. Para separar los horarios que quiere tomarse libre el doctor
+// pending = estodo para cuando el cliente agenda una cita
+// attended = estodo para cuando el doctor atiende una cita
