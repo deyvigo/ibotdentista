@@ -4,6 +4,7 @@ import { askToAI } from '../../services/ai'
 import { welcomeClient } from './welcome'
 import { services } from './service'
 import { doctorSchedule } from './doctorSchedule'
+import { consultations } from './consultations'
 
 const userSession = new Map<string, Session>()
 
@@ -51,6 +52,7 @@ export const mainFlowClient = async (socket: WASocket, messageInfo: proto.IWebMe
       doctorSchedule(socket, messageInfo)
       break
     case 'consultas':
+      consultations(socket, messageInfo)
       break
     case 'solicitar-cita':
       break
