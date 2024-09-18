@@ -2,6 +2,7 @@ import { WASocket, proto } from '@whiskeysockets/baileys'
 import { Session, ClientFlow } from '../../interfaces/session.interface'
 import { askToAI } from '../../services/ai'
 import { welcomeClient } from './welcome'
+import { services } from './service'
 
 const userSession = new Map<string, Session>()
 
@@ -43,6 +44,7 @@ export const mainFlowClient = async (socket: WASocket, messageInfo: proto.IWebMe
       welcomeClient(socket, messageInfo)
       break
     case 'servicios':
+      services(socket, messageInfo)
       break
     case 'horario-doctor':
       break
