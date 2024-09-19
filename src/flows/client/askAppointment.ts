@@ -33,6 +33,7 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
       session.step += 1
       break
     case 1:
+      // TODO: Aprovechando que se dio el día de la cita, traer una imagen con los horarios disponibles para ese día
       if (
         await clientResponseValidator(socket, messageText, from, session, 'no tiene relación con fechas o días')
       ) return

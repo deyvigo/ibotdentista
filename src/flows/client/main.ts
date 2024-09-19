@@ -6,6 +6,7 @@ import { services } from './service'
 import { doctorSchedule } from './doctorSchedule'
 import { consultations } from './consultations'
 import { askAppointment } from './askAppointment'
+import { consultAppointment } from './consultAppointment'
 
 const userSession = new Map<string, Session>()
 
@@ -61,6 +62,7 @@ export const mainFlowClient = async (socket: WASocket, messageInfo: proto.IWebMe
     case 'cancelar-cita':
       break
     case 'citas-creadas':
+      consultAppointment(socket, messageInfo)
       break
   }
 

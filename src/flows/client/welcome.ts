@@ -19,7 +19,7 @@ export const welcomeClient = async (socket: WASocket, messageInfo: proto.IWebMes
   const aiResponse = (await askToAI(prompt) as string).toLocaleLowerCase().trim()
 
   if (aiResponse === 'saludo') {
-    await sendText(socket, from!, 'Hola. Soy el asistente de la consultora dentista Sonrisa Colgate.')
+    await sendText(socket, from!, 'Hola. Soy el asistente de la Clínica Dental Tapia y Asociados.')
     await sendText(socket, from!, '¿En qué puedo ayudarte?')
     return
   }
