@@ -7,14 +7,17 @@ export interface AppointmentDTO extends RowDataPacket {
   day: string,
   hour: string,
   state: DateState,
+  reason: string,
   id_doctor: string,
-  id_client: string
+  id_client: string,
+  modified_by_admin_id: string
 }
 
 export interface CreateAppointmentDTO {
   day: string,
   hour: string,
   state: DateState,
+  reason: string,
   id_doctor: string,
   id_client: string
 }
@@ -26,5 +29,5 @@ export interface AppointmentClientDTO extends RowDataPacket {
   hour: string,
   dni: string,
   fullname: string,
-  doctor: string
+  doctor_name: string
 }

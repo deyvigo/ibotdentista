@@ -53,6 +53,7 @@ export const createDatabase = async () => {
       day                     date        not null,
       hour                    time        not null,
       state                   varchar(15) not null,
+      reason                  text        not null,
       id_doctor               uuid        not null,
       id_client               uuid        null,
       modified_by_admin_id    uuid        null,

@@ -4,20 +4,23 @@ export interface Session {
   payload: SessionDoctorSchedule | SessionClientAppointment | SessionDoctorService | {}
 }
 
+// Interface para que el doctor pueda crear su horario
 export interface SessionDoctorSchedule {
   day: string,
   start: string,
   end: string,
 }
 
+// Interface para que el cliente pueda crear una cita
 export interface SessionClientAppointment {
   day: string,
   hour: string,
   dni: string,
   fullname: string,
-  issue: string,
+  reason: string,
 }
 
+// Interface para que el doctor pueda crear un servicio
 export interface SessionDoctorService {
   name: string,
   price: number
