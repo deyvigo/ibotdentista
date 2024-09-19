@@ -1,6 +1,6 @@
-import { proto, WASocket } from "@whiskeysockets/baileys"
-import { askToAI } from "../../services/ai"
-import { sendText } from "../../services/bot/sendText"
+import { proto, WASocket } from '@whiskeysockets/baileys'
+import { askToAI } from '../../services/ai'
+import { sendText } from '../../services/bot/sendText'
 
 export const welcomeClient = async (socket: WASocket, messageInfo: proto.IWebMessageInfo) => {
   const from = messageInfo.key.remoteJid as string
