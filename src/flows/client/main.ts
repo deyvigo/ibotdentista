@@ -7,6 +7,9 @@ import { doctorSchedule } from './doctorSchedule'
 import { consultations } from './consultations'
 import { askAppointment } from './askAppointment'
 import { consultAppointment } from './consultAppointment'
+import { cancelAppointment } from './cancelAppointment'
+import { informationClientBot } from './informationBot'
+import { adress } from './adress'
 
 const userSession = new Map<string, Session>()
 
@@ -14,23 +17,21 @@ export const mainFlowClient = async (socket: WASocket, messageInfo: proto.IWebMe
   const from = messageInfo.key.remoteJid as string
   const messageText = messageInfo.message?.conversation?.toLocaleLowerCase() || ''
 
-  const prompt = `
-  Eres un asistente chatbot de un dentista.
-  Tus respuestas son cortas y concisas.
+  const instructions = `
   Tienes una lista de acciones disponibles para el usuario:
-  - bienvenida: para saludar al usuario o recibir agradecimientos
+  - informacion-bot: para preguntar sobre que puede hacer el asistente
+  - direccion: para preguntar la dirección de la clínica dentista
+  - bienvenida: para saludar al usuario o recibir agradecimientos o para presentarte ante el usuario
   - servicios: para listar los servicios disponibles por el consultorio dentista
   - horario-doctor: para solicitar el horario de trabajo de un doctor
   - consultas: para realizar consultas sobre odontología
   - solicitar-cita: para solicitar una cita con un doctor
   - cancelar-cita: para cancelar una cita con un doctor
   - citas-creadas: para ver las citas que el usuario ha realizado
-  Este es el mensaje del usuario: ${messageText}
-  Debes responder solo la accion que el usuario quiere realizar.
   Si el mensaje del usuario es un saludo, responde con la accion bienvenida.
   Si el mensaje del usuario no tiene relación con el servicio dental, responde con la accion bienvenida.
   La accion bienvenida es la de menor prioridad.
-  Respuesta ideal: (bienvenida|servicios|horario-doctor|consultas|solicitar-cita|cancelar-cita|citas-creadas)
+  Respuesta ideal: (informacion-bot|bienvenida|servicios|horario-doctor|consultas|solicitar-cita|cancelar-cita|citas-creadas). Solo la acción sin parentesis ni espacios.
   `
 
   // obtain user session
@@ -38,12 +39,18 @@ export const mainFlowClient = async (socket: WASocket, messageInfo: proto.IWebMe
 
   // Si el mensaje es solicitar-cita, no preguntar a la ia porque el flujo se rompe desde dentro
   if (session.flow !== 'solicitar-cita') {
-    session.flow = (await askToAI(prompt) as string).trim() as ClientFlow
+    session.flow = (await askToAI(messageText, instructions) as string).trim() as ClientFlow
   }
 
-  console.log('session.flow: ', session.flow)
+  console.log('user: ', from, 'session: ', session)
 
   switch (session.flow) {
+    case 'direccion':
+      adress(socket, messageInfo)
+      break
+    case 'informacion-bot':
+      informationClientBot(socket, messageInfo)
+      break
     case 'bienvenida':
       welcomeClient(socket, messageInfo)
       break
@@ -60,6 +67,7 @@ export const mainFlowClient = async (socket: WASocket, messageInfo: proto.IWebMe
       askAppointment(socket, messageInfo, session)
       break
     case 'cancelar-cita':
+      cancelAppointment(socket, messageInfo)
       break
     case 'citas-creadas':
       consultAppointment(socket, messageInfo)

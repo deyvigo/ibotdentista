@@ -131,7 +131,7 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
       if (result === 'Cita creada') {
         const doctorNumber = doctor[0].phone
         const doctorJid = `${doctorNumber}@s.whatsapp.net`
-        // await sendText(socket, doctorJid, `Doctor, un cliente ha agendado una cita para el día ${jsonData.day}  a las ${jsonData.hour}.`)
+        await sendText(socket, doctorJid, `Doctor, un cliente ha agendado una cita para el día ${jsonData.day}  a las ${jsonData.hour}.`)
       }
 
       // resetear el flujo
