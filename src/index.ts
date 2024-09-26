@@ -4,6 +4,9 @@ import { createDatabase } from './services/connection'
 
 import 'dotenv/config'
 import { mainFlow } from './flows/main'
+import { AppointmentRepository } from './repositories/appointment'
+import { programNotify } from './services/schedule/notify'
+import { programChangeStatusAppointment } from './services/schedule/programChangeStatus'
 
 // Create database
 createDatabase()
@@ -30,7 +33,6 @@ const connectToWhatsApp = async () => {
         connectToWhatsApp()
       }
     }
-
   })
 
   socket.ev.on('creds.update', saveCreds)
@@ -48,6 +50,13 @@ const connectToWhatsApp = async () => {
 
     mainFlow(socket, message)
   })
+
+  // program notify and change status for appointments in database
+  const appointments = await AppointmentRepository.getPendingAppointments()
+  for (const appointment of appointments) {
+    programNotify(socket, appointment, -30)
+    programChangeStatusAppointment(appointment, 'attended')
+  }
 }
 
 connectToWhatsApp()
