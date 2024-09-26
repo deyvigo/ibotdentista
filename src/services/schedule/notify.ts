@@ -22,17 +22,17 @@ export const programNotify = (socket: WASocket, appointment: AppointmentClientDT
   const job = schedule.scheduleJob(dateReminder, async () => {
     const clientJid = `${appointment.phone}@s.whatsapp.net`
     await sendText(socket, clientJid, `¡Hola! Tu cita con el doctor es en 30 minutos. Por favor, revisa tu agenda.`)
+    if (reminderJobs.has(appointment.id_appointment)) {
+      reminderJobs.delete(appointment.id_appointment)
+    }
   })
 
   reminderJobs.set(appointment.id_appointment, job)
 
   console.log(chalk.green(`Recordatorio programado: ${formatInTimeZone(dateReminder, timeZone, 'yyyy-MM-dd HH:mm')} 'para:' ${appointment.phone}`))
-  console.log(reminderJobs)
 }
 
 export const deleteNotify = (appointment: AppointmentClientDTO) => {
-  console.log(appointment)
-  console.log(reminderJobs)
   const job = reminderJobs.get(appointment.id_appointment)
   if (!job) {
     console.log(chalk.red(`No se encontró el recordatorio para ${appointment.id_appointment}`))
