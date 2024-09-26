@@ -7,12 +7,28 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-export const askToAI = async (question: string) => {
+type Message = {
+  role: 'system' | 'user' | 'assistant'
+  content: string
+}
+
+export const askToAI = async (question: string, systemMessages?: string, ) => {
+  const messages: Message[] = []
+
+  // predefine system messages
+  messages.push({ role: 'system', content: 'Te llamas Leopoldo y eres un asistente chatbot de un dentista que responde de manera amigable y corta.' })
+  
+  // push system instructions if provided
+  if (systemMessages) {
+    messages.push({ role: 'system', content: systemMessages })
+  }
+
+  // user message
+  messages.push({ role: 'user', content: question })
+
   const completion = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
-    messages: [
-      { role: 'user', content: question }
-    ],
+    model: 'gpt-4o-mini',
+    messages: messages
   })
 
   return completion.choices[0].message.content
