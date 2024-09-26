@@ -9,7 +9,7 @@ export const clientResponseValidator = async (
   const prompt = `
   Eres un bot de apoyo para un dentista y estás creando una cita.
   Si el mensaje del cliente ${validateCondition}, response con la acción salir.
-  Caso conttrario, responde con la acción aceptar.
+  Caso contrario, responde con la acción aceptar.
   Mesaje del cliente: ${message}
   Respuesta ideal: (salir|aceptar)
   `
@@ -20,7 +20,7 @@ export const clientResponseValidator = async (
     console.log('Saliendo del flujo de cliente...')
     session.flow = ''
     session.step = 0
-    await sendText(socket, from!, 'Lo siento :c. No puedo crear la cita porque has ingresado un dato incorrecto.')
+    await sendText(socket, from!, 'Lo siento. No puedo crear la cita porque has ingresado un dato incorrecto.')
     return true
   }
 
