@@ -1,4 +1,5 @@
-import { ServiceDTO } from '../interfaces/service.interface'
+import { ResultSetHeader } from 'mysql2'
+import { CreateServiceDTO, ServiceDTO } from '../interfaces/service.interface'
 import { dbConnection } from '../services/connection'
 
 export class ServiceRepository {
@@ -10,6 +11,18 @@ export class ServiceRepository {
     } catch (error) {
       console.log('Error getting services: ', error)
       return []
+    }
+  }
+
+  static createService = async (service: CreateServiceDTO) => {
+    const sql = 'INSERT INTO service (id_service, name, cost, id_doctor) VALUES (uuid(), ?, ?, ?);'
+    try {
+      const [results] =await dbConnection.query<ResultSetHeader>(sql, [service.name, service.cost, service.id_doctor])
+      if (results.affectedRows === 0) return 'No se pudo crear el servicio'
+      return 'Servicio creado exitosamente'
+    } catch (error) {
+      console.log('Error creating service: ', error)
+      return 'No se pudo crear el servicio'
     }
   }
 }

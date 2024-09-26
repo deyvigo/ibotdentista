@@ -25,4 +25,15 @@ export class ClientRepository {
       return 'No se pudo crear el cliente'
     }
   }
+
+  static getClientById = async (idClient: string) => {
+    const sql = 'SELECT * FROM client WHERE id_client = ?;'
+    try {
+      const [rows] = await dbConnection.query<ClientDTO[]>(sql, [idClient])
+      return rows
+    } catch (error) {
+      console.log('Error getting client by id: ', error)
+      return []
+    }
+  }
 }
