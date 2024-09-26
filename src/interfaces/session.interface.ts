@@ -4,7 +4,7 @@ export interface Session {
   payload: SessionDoctorSchedule | SessionClientAppointment | SessionDoctorService | {}
 }
 
-// Interface para que el doctor pueda crear su horario
+// Interface para que el doctor pueda cancelar citas de su horario
 export interface SessionDoctorSchedule {
   day: string,
   start: string,
@@ -26,6 +26,6 @@ export interface SessionDoctorService {
   price: number
 }
 
-export type DoctorFlow = 'bienvenida' | 'horario' | 'citas' | 'cancelar' | 'consultas' | 'servicios'
+export type DoctorFlow = 'bienvenida' | 'horario' | 'ver-citas' | 'cancelar' | 'consultas' | 'crear-servicio' | 'informacion-bot'
 
-export type ClientFlow = 'bienvenida' | 'servicios' | 'horario-doctor' | 'consultas' | 'solicitar-cita' | 'cancelar-cita' | 'citas-creadas'
+export type ClientFlow = 'bienvenida' | 'servicios' | 'horario-doctor' | 'consultas' | 'solicitar-cita' | 'cancelar-cita' | 'citas-creadas' | 'informacion-bot' | 'direccion'

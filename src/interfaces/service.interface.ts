@@ -5,3 +5,9 @@ export interface ServiceDTO extends RowDataPacket{
   name: string,
   cost: string
 }
+
+export interface CreateServiceDTO {
+  name: string,
+  cost: string,
+  id_doctor: string
+}

@@ -29,5 +29,16 @@ export interface AppointmentClientDTO extends RowDataPacket {
   hour: string,
   dni: string,
   fullname: string,
-  doctor_name: string
+  doctor_name: string,
+  state: DateState,
+  phone: string
+}
+
+// Interface to create appintments day schedule image
+export interface AppointmentDoctorDTO extends RowDataPacket {
+  full_name: string,
+  dni: string,
+  hour: string
+  phone: string
+  state: DateState
 }
