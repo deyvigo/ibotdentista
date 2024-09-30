@@ -67,11 +67,11 @@ export class AppointmentRepository {
     `
     try {
       const [result] = await dbConnection.query<ResultSetHeader>(query, [idClient])
-      if (result.affectedRows === 0) return 'No se pudo eliminar la cita'
-      return 'Cita eliminada'
+      if (result.affectedRows === 0) return 'No se pudo eliminar su cita'
+      return 'Su cita ha sido eliminada'
     } catch (error) {
       console.error('Error deleting appointment by id client: ', error)
-      return 'No se pudo eliminar la cita'
+      return 'No se pudo eliminar su cita'
     }
   }
 

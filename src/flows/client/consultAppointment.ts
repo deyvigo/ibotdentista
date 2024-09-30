@@ -18,6 +18,6 @@ export const consultAppointment = async (socket: WASocket, messageInfo: proto.IW
 
   const imgBuffer = createAppointmentImage(listAppointments[0])
 
-  await sendText(socket, from!, 'Claro. Aquí está la cita que tienes pendiente.')
+  await sendText(socket, from!, 'Claro. Aquí tienes la cita pendiente.')
   await sendImage(socket, from!, imgBuffer)
 }

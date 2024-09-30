@@ -15,6 +15,6 @@ export const services = async (socket: WASocket, messageInfo: proto.IWebMessageI
 
   const imgBuffer = createServicesCard(services)
 
-  await sendText(socket, from!, 'Estos son los servicios que ofrece el consultorio dental:')
+  await sendText(socket, from!, 'Estos son los servicios que ofrece el consultorio dental Tapia y Asociados:')
   await sendImage(socket, from!, imgBuffer)
 }

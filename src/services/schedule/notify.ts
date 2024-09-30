@@ -10,7 +10,7 @@ const reminderJobs = new Map()
 
 /**
   * @param {WASocket} socket WhatsApp Web Socket
-  * @param {number} timePrev in minutes to remind the appointment
+  * @param {number} timePrev in minutes to remind the appointment (-) for time before appointment and (+) for time after appointment
 */
 export const programNotify = (socket: WASocket, appointment: AppointmentClientDTO, timePrev: number) => {
   const timeZone = 'America/Lima'
@@ -29,7 +29,7 @@ export const programNotify = (socket: WASocket, appointment: AppointmentClientDT
 
   reminderJobs.set(appointment.id_appointment, job)
 
-  console.log(chalk.green(`Recordatorio programado: ${formatInTimeZone(dateReminder, timeZone, 'yyyy-MM-dd HH:mm')} 'para:' ${appointment.phone}`))
+  console.log(chalk.green(`Recordatorio programado: ${formatInTimeZone(dateReminder, timeZone, 'yyyy-MM-dd HH:mm')} para: ${appointment.phone}`))
 }
 
 export const deleteNotify = (appointment: AppointmentClientDTO) => {

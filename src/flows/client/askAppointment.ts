@@ -2,12 +2,14 @@ import { proto, WASocket } from '@whiskeysockets/baileys'
 import { Session, SessionClientAppointment } from '../../interfaces/session.interface'
 import { AppointmentRepository } from '../../repositories/appointment'
 import { sendText } from '../../services/bot/sendText'
-import { clientResponseValidator } from '../../utils/validators/clientValidator'
+import { clientAskAppValidator } from '../../utils/validators/clientValidator'
 import { formatDate } from '../../utils/formatDate'
 import { askToAI } from '../../services/ai'
 import { appointmentHourIsAvailable, appointmentInWorkHours, appointmentIsPast } from '../../utils/validators/appointment'
 import { ClientRepository } from '../../repositories/client'
 import { DoctorRepository } from '../../repositories/doctor'
+import { programNotify } from '../../services/schedule/notify'
+import { programChangeStatusAppointment } from '../../services/schedule/programChangeStatus'
 
 export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMessageInfo, session: Session) => {
   const from = messageInfo.key.remoteJid as string
@@ -16,10 +18,10 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
 
   const clientPayload = session.payload as SessionClientAppointment
 
-  // Only one appointment for phone number
-  const dateExists = await AppointmentRepository.getAppointmentByClientNumber(clientNumber)
+  // Only one appointment per phone number
+  const appointmentExists = await AppointmentRepository.getAppointmentByClientNumber(clientNumber)
 
-  if (dateExists.length > 0) {
+  if (appointmentExists.length > 0) {
     await sendText(socket, from!, 'Ya existe una cita para este número de teléfono. Por favor, revisa tu agenda.')
     session.flow = ''
     session.step = 0
@@ -35,7 +37,7 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
     case 1:
       // TODO: Aprovechando que se dio el día de la cita, traer una imagen con los horarios disponibles para ese día
       if (
-        await clientResponseValidator(socket, messageText, from, session, 'no tiene relación con fechas o días')
+        !await clientAskAppValidator(socket, messageText, from, session, 'un día o una fecha')
       ) return
 
       clientPayload.day = messageText
@@ -46,29 +48,55 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
       break
     case 2:
       if (
-        await clientResponseValidator(socket, messageText, from, session, 'no contiene un número de hora o una hora')
+        !await clientAskAppValidator(socket, messageText, from, session, 'una hora del día')
       ) return
 
       clientPayload.hour = messageText
       session.payload = clientPayload
       session.step += 1
 
-      await sendText(socket, from!, '¿Cuál es el número de DNI?')
+      const prompt = `
+      Tu tarea principal es formatear los datos del cliente.
+      Información del cliente: ${JSON.stringify(clientPayload)}
+      Construye un objeto JSON con la siguiente estructura:
+      {
+        "day": "Día de la cita en formato YYYY-MM-DD. Llevar al día más cercano en el futuro.",
+        "hour": "Hora de la cita en formato HH:MM (24 horas).",
+      }
+      Responde solo el objeto JSON. No incluyas ningún otro texto.
+      Objeto JSON generado:
+      `
+
+      const dayHour = await askToAI(prompt) as string
+
+      const jData = JSON.parse(dayHour) as SessionClientAppointment
+
+      // comprobar que la hora y dia no sean pasados
+      if (appointmentIsPast(socket, jData, from, session)) return
+
+      // comprobar que la hora esté dentro del horario de trabajo
+      if (!await appointmentInWorkHours(socket, jData, from, session)) return
+
+      // comprobar que la hora de la cita no esté ocupada
+      if (!await appointmentHourIsAvailable(socket, jData, from, session)) return
+
+
+      await sendText(socket, from!, '¿Cuál es el motivo de la cita?')
       break
     case 3:
       if (
-        await clientResponseValidator(socket, messageText, from, session, 'no tiene relación con un DNI (una cadena de 9 dígitos)')
+        !await clientAskAppValidator(socket, messageText, from, session, 'un motivo para la cita')
       ) return
 
       clientPayload.dni = messageText
       session.payload = clientPayload
       session.step += 1
 
-      await sendText(socket, from!, '¿Cuál es el motivo de la cita?')
+      await sendText(socket, from!, '¿Cuál es el número de DNI?')
       break
     case 4:
       if (
-        await clientResponseValidator(socket, messageText, from, session, 'no es un motivo para ir al dentista')
+        !await clientAskAppValidator(socket, messageText, from, session, 'el número de DNI (cadena de 8 dígitos)')
       ) return
 
       clientPayload.reason = messageText
@@ -79,7 +107,7 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
       break
     case 5:
       if (
-        await clientResponseValidator(socket, messageText, from, session, 'no contiene un nombre')
+        !await clientAskAppValidator(socket, messageText, from, session, 'un nombre')
       ) return
 
       clientPayload.fullname = messageText
@@ -87,11 +115,11 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
       
       await sendText(socket, from!, 'Gracias. Ahora crearé la cita.')
 
-      const prompt = `
+      const message = `
       Siendo hoy ${formatDate(new Date())}.
       Tu tarea principal es analizar la información enviada por el cliente.
       Información del cliente: ${JSON.stringify(clientPayload)}
-      Deber generar un objeto JSON con la siguiente estructura:
+      Tu tarea principal es analizar la información del cliente y generar un objeto JSON con la siguiente estructura:
       {
         "day": "Día de la cita en formato YYYY-MM-DD. Llevar al día más cercano en el futuro.",
         "hour": "Hora de la cita en formato HH:MM (24 horas).",
@@ -99,20 +127,13 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
         "fullname": "Nombre completo del cliente.",
         "reason": "Motivo de la cita."
       }
+      Responde solo con el objeto JSON. No incluyas ningún otro texto.
       Objeto JSON generado:
       `
 
-      const data = await askToAI(prompt) as string
+      const data = await askToAI(message) as string
+
       const jsonData = JSON.parse(data) as SessionClientAppointment
-
-      // comprobar que la hora y dia no sean pasados
-      if (appointmentIsPast(socket, jsonData, from, session)) return
-
-      // comprobar que la hora esté dentro del horario de trabajo
-      if (!await appointmentInWorkHours(socket, jsonData, from, session)) return
-
-      // comprobar que el horario no esté ocupado
-      if (!await appointmentHourIsAvailable(socket, jsonData, from, session)) return
 
       const client = await ClientRepository.getClientByNumber(clientNumber)
       if (client.length === 0) {
@@ -129,9 +150,17 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
       await sendText(socket, from!, result)
 
       if (result === 'Cita creada') {
+        // send notification to doctor
         const doctorNumber = doctor[0].phone
         const doctorJid = `${doctorNumber}@s.whatsapp.net`
         await sendText(socket, doctorJid, `Doctor, un cliente ha agendado una cita para el día ${jsonData.day}  a las ${jsonData.hour}.`)
+
+        // establish reminder to change status to attended and send notification to client
+        const appointment = await AppointmentRepository.getAppointmentByClientNumber(clientNumber)
+        if (appointment.length > 0) {
+          programNotify(socket, appointment[0], -30)
+          programChangeStatusAppointment(appointment[0], 'attended')
+        }
       }
 
       // resetear el flujo

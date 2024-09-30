@@ -6,15 +6,13 @@ export const consultations = async (socket: WASocket, messageInfo: proto.IWebMes
   const from = messageInfo.key.remoteJid as string
   const messageText = messageInfo.message?.conversation || ''
 
-  const prompt = `
-  Eres un asistente chatbot de un dentista.
+  const instructions = `
   Responde a la pregunta del usuario.
-  La pregunta es: ${messageText}
   Tu respuesta debe ser corta y concisa.
   No puedes mandar una respuesta vacía.
   `
 
-  const aiResponse = await askToAI(prompt) as string
+  const aiResponse = await askToAI(messageText, instructions) as string
 
   await sendText(socket, from!, aiResponse)
 }

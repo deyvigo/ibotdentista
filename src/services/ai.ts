@@ -16,7 +16,7 @@ export const askToAI = async (question: string, systemMessages?: string, ) => {
   const messages: Message[] = []
 
   // predefine system messages
-  messages.push({ role: 'system', content: 'Te llamas Leopoldo y eres un asistente chatbot de un dentista que responde de manera amigable y corta.' })
+  messages.push({ role: 'system', content: 'Te llamas Leopoldo y eres un asistente chatbot de una clínica dental llamada Tapia y Asociados que responde de manera amigable y corta.' })
   
   // push system instructions if provided
   if (systemMessages) {

@@ -2,27 +2,30 @@ import { WASocket } from "@whiskeysockets/baileys";
 import { Session } from "../../interfaces/session.interface";
 import { askToAI } from "../../services/ai";
 import { sendText } from "../../services/bot/sendText";
+import { formatDate } from "../formatDate";
 
-export const clientResponseValidator = async (
+export const clientAskAppValidator = async (
   socket: WASocket, message: string, from: string, session: Session, validateCondition: string
 ) => {
-  const prompt = `
-  Eres un bot de apoyo para un dentista y estás creando una cita.
-  Si el mensaje del cliente ${validateCondition}, response con la acción salir.
-  Caso contrario, responde con la acción aceptar.
-  Mesaje del cliente: ${message}
-  Respuesta ideal: (salir|aceptar)
+  const instructions = `
+  Siendo hoy ${formatDate(new Date())}.
+  Estás preguntando datos al cliente para crear un cita.
+  Ahora le estás pidiendo ${validateCondition}.
+  Si el mensaje del cliente está correcto según el tipo de dato que has pedido, responde con la acción aceptar.
+  Caso contrario, responde con la acción salir.
+  Responde solo la acción. No incluyas ningún otro texto.
+  Recuerda que el doctor no trabaja los domingos.
   `
 
-  const option = await askToAI(prompt) as string
+  const option = (await askToAI(message, instructions) as string).toLocaleLowerCase().trim() 
 
   if (option === 'salir') {
     console.log('Saliendo del flujo de cliente...')
     session.flow = ''
     session.step = 0
     await sendText(socket, from!, 'Lo siento. No puedo crear la cita porque has ingresado un dato incorrecto.')
-    return true
+    return false
   }
 
-  return false
+  return true
 }

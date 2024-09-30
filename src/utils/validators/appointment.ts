@@ -33,8 +33,6 @@ export const appointmentInWorkHours = async (
   const hours = await ScheduleRepository.getByDay(day)
   const hour = `${dataClient.hour}:00`
 
-  console.log('horario: ', hours)
-
   for (const { start, end } of hours) {
     if (start <= hour && hour < end) {
       return true
