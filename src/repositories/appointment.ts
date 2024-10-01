@@ -150,4 +150,24 @@ export class AppointmentRepository {
       return 'No se pudo cambiar el estado de la cita'
     }
   }
+
+  static getByDayAndHourInteval = async (day: string, start: string, end: string) => {
+    const query = `
+    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, c.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name
+    FROM appointment a
+    JOIN client c ON a.id_client = c.id_client
+    JOIN doctor d ON a.id_doctor = d.id_doctor
+    WHERE a.state = 'pending'
+    AND a.day = ?
+    AND a.hour >= ?
+    AND a.hour < ?;
+    `
+    try {
+      const [rows] = await dbConnection.query<AppointmentClientDTO[]>(query, [day, start, end])
+      return rows
+    } catch (error) {
+      console.error('Error getting appointment by day and hour: ', error)
+      return []
+    }
+  }
 }

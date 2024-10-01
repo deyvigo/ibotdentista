@@ -1,12 +1,13 @@
 import { proto, WASocket } from '@whiskeysockets/baileys'
 import { Session, SessionDoctorSchedule } from '../../interfaces/session.interface'
 import { sendText } from '../../services/bot/sendText'
-import { doctorResponseValidator } from '../../utils/validators/doctorResponsesValidator'
 import { formatDate } from '../../utils/formatDate'
 import { askToAI } from '../../services/ai'
 import { AppointmentRepository } from '../../repositories/appointment'
 import { DoctorRepository } from '../../repositories/doctor'
-import { ClientRepository } from '../../repositories/client'
+import { doctorServiceValidator } from '../../utils/validators/doctorValidator'
+import { deleteNotify } from '../../services/schedule/notify'
+import { deleteReminderChangeStatus } from '../../services/schedule/programChangeStatus'
 
 export const cancelAppointments = async (
   socket: WASocket, messageInfo: proto.IWebMessageInfo, session: Session
@@ -25,8 +26,8 @@ export const cancelAppointments = async (
       break
     case 1:
       if (
-        await doctorResponseValidator(socket, session, messageInfo, `, siendo hoy ${formatDate(new Date())}; no tiene relación con días y fechas`)
-      ) return 
+        !await doctorServiceValidator(socket, messageText, from, session, 'un día de la semana o un día o una fecha (puede ser hoy)')
+      ) return
 
       doctorPayload.day = messageText.toLocaleLowerCase()
       session.payload = doctorPayload
@@ -36,7 +37,7 @@ export const cancelAppointments = async (
       break
     case 2:
       if (
-        await doctorResponseValidator(socket, session, messageInfo, 'no contiene un número de hora o una hora')
+        !await doctorServiceValidator(socket, messageText, from, session, 'un número de hora o una hora')
       ) return
 
       doctorPayload.start = messageText
@@ -47,7 +48,7 @@ export const cancelAppointments = async (
       break
     case 3:
       if (
-        await doctorResponseValidator(socket, session, messageInfo, 'no contiene un número de hora o una hora')
+        !await doctorServiceValidator(socket, messageText, from, session, 'un número de hora o una hora')
       ) return
 
       doctorPayload.end = messageText
@@ -55,11 +56,12 @@ export const cancelAppointments = async (
 
       sendText(socket, from!, 'Gracias. Ahora cancelaré las citas dentro de ese intervalo de tiempo.')
 
-      const prompt = `
+      const message = `
       Siendo hoy ${formatDate(new Date())}.
       Tu tarea principal es analizar la información enviada por el dentista.
       Información del dentista: ${JSON.stringify(doctorPayload)}
       Debes generar un objeto JSON con la siguiente estructura teniendo en cuenta la información del dentista.
+      Ignora los intervalos 12-1 y 1-2 de la tarde porque son horarios de almuerzo.
       Debes considerar intervalos de 1 hora de tiempo en cada objeto del arreglo:
       [
         {
@@ -68,17 +70,19 @@ export const cancelAppointments = async (
           "end": "Hora final en formato HH:MM (24 horas)",
         },
       ]
-      Ignora los intervalos 12-1 y 1-2 de la tarde porque son horarios de almuerzo.
+      Responde solo el arrego del objeto JSON. No incluyas ningún otro texto ni ningún delimitador.
       Objeto JSON generado:
       `
 
-      const data = await askToAI(prompt) as string
+      const data = await askToAI(message) as string
+
+      console.log('data: ', data)
       const jsonData = JSON.parse(data) as SessionDoctorSchedule[]
 
       console.log('jsonData: ', jsonData)
 
       // Para avisar a los usuarios que se les canceló la cita
-      const appoints = await AppointmentRepository.getAllByDay(jsonData[0].day)
+      const appoints = await AppointmentRepository.getByDayAndHourInteval(jsonData[0].day, jsonData[0].start, jsonData[jsonData.length - 1].end)
       console.log('appoints: ', appoints)
 
       const doctor = await DoctorRepository.getDoctors()
@@ -98,6 +102,12 @@ export const cancelAppointments = async (
         for (const appointment of appoints) {
           const number = appointment.phone + '@s.whatsapp.net'
           await sendText(socket, number, 'Se ha cancelado tu cita por motivos personales del doctor.')
+
+          // delete notifications and reminders to change status to attended
+          deleteNotify(appointment)
+          deleteReminderChangeStatus(appointment)
+
+          // TODO: create a session client to new flow to update the appointment
         }
       }
 

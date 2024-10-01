@@ -9,12 +9,12 @@ export const scheduleDoctor = async (socket: WASocket, messageInfo: proto.IWebMe
   const schedule = await ScheduleRepository.getSchedule()
 
   if (schedule.length === 0) {
-    await sendText(socket, from!, 'No hay horarios disponibles')
+    await sendText(socket, from!, 'No tienes un horario de trabajo definido aún.')
     return
   }
 
   await sendText(socket, from!, 'Este es tu horario de trabajo:')
-
+  
   const scheduleImage = createScheduleImage(schedule)
 
   await sendImage(socket, from!, scheduleImage)

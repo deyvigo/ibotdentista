@@ -22,7 +22,7 @@ export const addService = async (socket: WASocket, messageInfo: proto.IWebMessag
       break
     case 1:
       if (
-        await serviceDoctorValidator(socket, from!, session, messageText, 'no contiene un nombre de un servicio de dentista')
+        !await serviceDoctorValidator(socket, from!, session, messageText, 'un nombre de un servicio de dentista')
       ) return
 
       clientPayload.name = messageText
@@ -33,7 +33,7 @@ export const addService = async (socket: WASocket, messageInfo: proto.IWebMessag
       break
     case 2:
       if (
-        await serviceDoctorValidator(socket, from!, session, messageText, 'no hace referencia un precio o dinero')
+        await serviceDoctorValidator(socket, from!, session, messageText, 'un precio, número o dinero')
       ) return
 
       const prompt = `
@@ -44,6 +44,7 @@ export const addService = async (socket: WASocket, messageInfo: proto.IWebMessag
         "name": "Nombre del servicio.",
         "cost": "Precio del servicio (solo número)."
       }
+      Responde solo con el objeto JSON. No incluyas ningún otro texto.
       Objeto JSON generado:
       `
 

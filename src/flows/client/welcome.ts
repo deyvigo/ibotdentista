@@ -7,7 +7,7 @@ export const welcomeClient = async (socket: WASocket, messageInfo: proto.IWebMes
   const messageText = messageInfo.message?.conversation || ''
 
   const instructions = `
-  Solo puedes responder preguntas con temas a tu alcance.
+  Solo puedes responder preguntas con temas a tu alcance, recuerda que eres un asistente de un dentista.
   Si el mensaje del usuario es un saludo, te presentas.
   Si el mensaje del usuario es una pregunta sobre ti, te presentas.
   Si el mensaje del usuario es un agradecimiento, responde adecuadamente.

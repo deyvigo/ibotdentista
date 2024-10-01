@@ -37,7 +37,7 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
     case 1:
       // TODO: Aprovechando que se dio el día de la cita, traer una imagen con los horarios disponibles para ese día
       if (
-        !await clientAskAppValidator(socket, messageText, from, session, 'un día o una fecha')
+        !await clientAskAppValidator(socket, messageText, from, session, 'un día para agendar la cita (puede ser hoy también)')
       ) return
 
       clientPayload.day = messageText
@@ -60,7 +60,7 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
       Información del cliente: ${JSON.stringify(clientPayload)}
       Construye un objeto JSON con la siguiente estructura:
       {
-        "day": "Día de la cita en formato YYYY-MM-DD. Llevar al día más cercano en el futuro.",
+        "day": "Día de la cita en formato YYYY-MM-DD. No puede ser un día pasado.",
         "hour": "Hora de la cita en formato HH:MM (24 horas).",
       }
       Responde solo el objeto JSON. No incluyas ningún otro texto.
@@ -70,6 +70,8 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
       const dayHour = await askToAI(prompt) as string
 
       const jData = JSON.parse(dayHour) as SessionClientAppointment
+
+      console.log('jData: ', jData)
 
       // comprobar que la hora y dia no sean pasados
       if (appointmentIsPast(socket, jData, from, session)) return
@@ -88,7 +90,7 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
         !await clientAskAppValidator(socket, messageText, from, session, 'un motivo para la cita')
       ) return
 
-      clientPayload.dni = messageText
+      clientPayload.reason = messageText
       session.payload = clientPayload
       session.step += 1
 
@@ -99,7 +101,7 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
         !await clientAskAppValidator(socket, messageText, from, session, 'el número de DNI (cadena de 8 dígitos)')
       ) return
 
-      clientPayload.reason = messageText
+      clientPayload.dni = messageText
       session.payload = clientPayload
       session.step += 1
 
@@ -121,7 +123,7 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
       Información del cliente: ${JSON.stringify(clientPayload)}
       Tu tarea principal es analizar la información del cliente y generar un objeto JSON con la siguiente estructura:
       {
-        "day": "Día de la cita en formato YYYY-MM-DD. Llevar al día más cercano en el futuro.",
+        "day": "Día de la cita en formato YYYY-MM-DD. No puede ser un día pasado.",
         "hour": "Hora de la cita en formato HH:MM (24 horas).",
         "dni": "DNI del cliente (cadena de 8 dígitos).",
         "fullname": "Nombre completo del cliente.",
@@ -134,6 +136,9 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
       const data = await askToAI(message) as string
 
       const jsonData = JSON.parse(data) as SessionClientAppointment
+
+      console.log(message)
+      console.log('jsonData: ', jsonData)
 
       const client = await ClientRepository.getClientByNumber(clientNumber)
       if (client.length === 0) {

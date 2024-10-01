@@ -6,27 +6,26 @@ export const welcomeDoctor = async (socket: WASocket, messageInfo: proto.IWebMes
   const from = messageInfo.key.remoteJid as string
   const messageText = messageInfo.message?.conversation || ''
 
-  const prompt = `
-  Eres un asistente chatbot de un dentista.
-  Solo tienes dos respuestas posibles:
-  - saludo: si el mensaje del dentista es un saludo
-  - gracias: si el mensaje del usuario es un agradecimiento.
-  - disculpas: si el mensaje del dentista es cualquier otra cosa
-  Este es el mensaje del dentista: ${messageText}
-  Debes responder solo la acción que el dentista quiere realizar.
+  const instructions = `
+  Estás atendiendo al doctor en este momento.
+  Solo puedes responder preguntas con temas a tu alcance, recuerda que eres un asistente de un dentista.
+  Si el mensaje del usuario es un saludo, te presentas.
+  Si el mensaje del usuario es una pregunta sobre ti, te presentas.
+  Si el mensaje del usuario es un agradecimiento, responde adecuadamente.
+  Caso contrario, respondes la pregunta sin saludar.
   `
 
-  const aiResponse = await askToAI(prompt)
+  const aiResponse = (await askToAI(messageText,instructions) as string).trim()
 
-  if (aiResponse === 'saludo') {
-    await sendText(socket, from!, '¡Hola! Soy tu asistente inteligente ¿En qué puedo ayudarte?')
-    return
-  }
+  // if (aiResponse === 'saludo') {
+  //   await sendText(socket, from!, '¡Hola! Soy tu asistente inteligente ¿En qué puedo ayudarte?')
+  //   return
+  // }
 
-  if (aiResponse === 'gracias') {
-    await sendText(socket, from!, 'De nada. Estoy aquí para ayudarte.')
-    return
-  }
+  // if (aiResponse === 'gracias') {
+  //   await sendText(socket, from!, 'De nada. Estoy aquí para ayudarte.')
+  //   return
+  // }
 
-  await sendText(socket, from!, 'Disculpa, no puedo ayudarte con eso.')
+  await sendText(socket, from!, aiResponse)
 }

@@ -7,6 +7,7 @@ import { scheduleDoctor } from './schedule'
 import { addService } from './addService'
 import { viewDaySchedule } from './viewDaySchedule'
 import { cancelAppointments } from './cancelAppointments'
+import { informationDoctorBot } from './informationBot'
 
 const userSessions = new Map<string, Session>()
 
@@ -14,9 +15,7 @@ export const mainFlowDoctor = async (socket: WASocket, messageInfo: proto.IWebMe
   const from = messageInfo.key.remoteJid as string
   const messageText = messageInfo.message?.conversation?.toLocaleLowerCase() || ''
 
-  const prompt = `
-  Eres un asistente chatbot de un dentista.
-  Tus respuestas son cortas y concisas.
+  const instructions = `
   Tienes una lista de acciones disponibles para el dentista:
   - informacion-bot: para preguntar sobre que hace el bot
   - bienvenida: para saludar al usuario o recibir agradecimientos
@@ -25,28 +24,27 @@ export const mainFlowDoctor = async (socket: WASocket, messageInfo: proto.IWebMe
   - cancelar: para cancelar citas o tomarse tiempo del día libre
   - crear-servicio: para agregar un nuevo servicio
   - consultas: para realizar consultas sobre odontología
-  Este es el mensaje del dentista: ${messageText}
-  Debes responder solo la accion que el dentista quiere realizar.
   Si el mensaje del dentista es un saludo, responde con la accion bienvenida.
   Si el mensaje del dentista no tiene relación con el servicio dental, responde con la accion bienvenida.
   La accion bienvenida es la de menor prioridad.
-  Respuesta ideal: (informacion-bot|bienvenida|horario|citas|cancelar|crear-servicio|consultas)
+  Respuesta ideal: (informacion-bot|bienvenida|horario|citas|cancelar|crear-servicio|consultas). Solo la acción sin parentesis ni espacios.
   `
 
   // obtain user session
   let session = userSessions.get(from) || { step: 0, flow: '', payload: {} }
 
   if (session.flow !== 'cancelar' && session.flow !== 'crear-servicio') {
-    session.flow = (await askToAI(prompt) as string).trim() as DoctorFlow
+    session.flow = (await askToAI(messageText, instructions) as string).trim() as DoctorFlow
   }
 
   console.log('user: ', from, 'session: ', session)
 
   switch (session.flow) {
     case 'informacion-bot':
+      informationDoctorBot(socket, messageInfo)
       break
     case 'bienvenida':
-      await welcomeDoctor(socket, messageInfo)
+      welcomeDoctor(socket, messageInfo)
       break
     case 'horario':
       scheduleDoctor(socket, messageInfo)
@@ -61,7 +59,7 @@ export const mainFlowDoctor = async (socket: WASocket, messageInfo: proto.IWebMe
       addService(socket, messageInfo, session)
       break
     case 'consultas':
-      await consultation(socket, messageInfo)
+      consultation(socket, messageInfo)
       break
   }
 
