@@ -8,7 +8,7 @@ import { askToAI } from '../../services/ai'
 import { appointmentHourIsAvailable, appointmentInWorkHours, appointmentIsPast } from '../../utils/validators/appointment'
 import { ClientRepository } from '../../repositories/client'
 import { DoctorRepository } from '../../repositories/doctor'
-import { programNotify } from '../../services/schedule/notify'
+import { programNotify } from '../../services/schedule/programNotify'
 import { programChangeStatusAppointment } from '../../services/schedule/programChangeStatus'
 
 export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMessageInfo, session: Session) => {
@@ -37,7 +37,7 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
     case 1:
       // TODO: Aprovechando que se dio el día de la cita, traer una imagen con los horarios disponibles para ese día
       if (
-        !await clientAskAppValidator(socket, messageText, from, session, 'un día para agendar la cita (puede ser hoy también)')
+        !await clientAskAppValidator(socket, messageText, from, session, 'un día para agendar la cita (puede ser hoy también y los sabados)')
       ) return
 
       clientPayload.day = messageText
@@ -48,7 +48,7 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
       break
     case 2:
       if (
-        !await clientAskAppValidator(socket, messageText, from, session, 'una hora del día')
+        !await clientAskAppValidator(socket, messageText, from, session, 'una hora del día para asistir a la cita')
       ) return
 
       clientPayload.hour = messageText
@@ -63,7 +63,7 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
         "day": "Día de la cita en formato YYYY-MM-DD. No puede ser un día pasado.",
         "hour": "Hora de la cita en formato HH:MM (24 horas).",
       }
-      Responde solo el objeto JSON. No incluyas ningún otro texto.
+      Responde solo el objeto JSON. No incluyas ningún otro texto. Ni delimitadores.
       Objeto JSON generado:
       `
 
@@ -81,7 +81,6 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
 
       // comprobar que la hora de la cita no esté ocupada
       if (!await appointmentHourIsAvailable(socket, jData, from, session)) return
-
 
       await sendText(socket, from!, '¿Cuál es el motivo de la cita?')
       break
@@ -129,16 +128,13 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
         "fullname": "Nombre completo del cliente.",
         "reason": "Motivo de la cita."
       }
-      Responde solo con el objeto JSON. No incluyas ningún otro texto.
+      Responde solo con el objeto JSON. No incluyas ningún otro texto. Ni delimitadores.
       Objeto JSON generado:
       `
 
       const data = await askToAI(message) as string
 
       const jsonData = JSON.parse(data) as SessionClientAppointment
-
-      console.log(message)
-      console.log('jsonData: ', jsonData)
 
       const client = await ClientRepository.getClientByNumber(clientNumber)
       if (client.length === 0) {
@@ -162,6 +158,7 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
 
         // establish reminder to change status to attended and send notification to client
         const appointment = await AppointmentRepository.getAppointmentByClientNumber(clientNumber)
+        console.log('appointment: ', appointment)
         if (appointment.length > 0) {
           programNotify(socket, appointment[0], -30)
           programChangeStatusAppointment(appointment[0], 'attended')

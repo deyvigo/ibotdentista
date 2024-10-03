@@ -5,7 +5,7 @@ import { createDatabase } from './services/connection'
 import 'dotenv/config'
 import { mainFlow } from './flows/main'
 import { AppointmentRepository } from './repositories/appointment'
-import { programNotify } from './services/schedule/notify'
+import { programNotify } from './services/schedule/programNotify'
 import { programChangeStatusAppointment } from './services/schedule/programChangeStatus'
 
 // Create database

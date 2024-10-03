@@ -6,7 +6,7 @@ import { askToAI } from '../../services/ai'
 import { AppointmentRepository } from '../../repositories/appointment'
 import { DoctorRepository } from '../../repositories/doctor'
 import { doctorServiceValidator } from '../../utils/validators/doctorValidator'
-import { deleteNotify } from '../../services/schedule/notify'
+import { deleteNotify } from '../../services/schedule/programNotify'
 import { deleteReminderChangeStatus } from '../../services/schedule/programChangeStatus'
 
 export const cancelAppointments = async (

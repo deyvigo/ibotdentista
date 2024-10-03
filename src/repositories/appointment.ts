@@ -170,4 +170,16 @@ export class AppointmentRepository {
       return []
     }
   }
+
+  static updateAppointmentById = async (idAppointment: string, day: string, hour: string) => {
+    const query = `UPDATE appointment SET day = ?, hour = ? WHERE id_appointment = ?;`
+    try {
+      const [resul] = await dbConnection.query<ResultSetHeader>(query, [day, hour, idAppointment])
+      if (resul.affectedRows === 0) return 'No se pudo actualizar la cita'
+      return 'Su cita ha sido actualizada'
+    } catch (error) {
+      console.error('Error updating appointment: ', error)
+      return 'No se pudo actualizar la cita'
+    }
+  }
 }

@@ -2,7 +2,7 @@ import { proto, WASocket } from '@whiskeysockets/baileys'
 import { ClientRepository } from '../../repositories/client'
 import { sendText } from '../../services/bot/sendText'
 import { AppointmentRepository } from '../../repositories/appointment'
-import { deleteNotify } from '../../services/schedule/notify'
+import { deleteNotify } from '../../services/schedule/programNotify'
 import { deleteReminderChangeStatus } from '../../services/schedule/programChangeStatus'
 
 export const cancelAppointment = async (socket: WASocket, messageInfo: proto.IWebMessageInfo) => {
@@ -17,6 +17,7 @@ export const cancelAppointment = async (socket: WASocket, messageInfo: proto.IWe
   }
 
   const appointments = await AppointmentRepository.getAppointmentByClientNumber(clientNumber)
+  console.log('appointments: ', appointments)
   
   // delete recordatory appointment recordatory and reminder change status
   for (const appointment of appointments) {

@@ -22,14 +22,12 @@ export const programNotify = (socket: WASocket, appointment: AppointmentClientDT
   const job = schedule.scheduleJob(dateReminder, async () => {
     const clientJid = `${appointment.phone}@s.whatsapp.net`
     await sendText(socket, clientJid, `¡Hola! Tu cita con el doctor es en 30 minutos. Por favor, revisa tu agenda.`)
-    if (reminderJobs.has(appointment.id_appointment)) {
-      reminderJobs.delete(appointment.id_appointment)
-    }
   })
 
   reminderJobs.set(appointment.id_appointment, job)
 
-  console.log(chalk.green(`Recordatorio programado: ${formatInTimeZone(dateReminder, timeZone, 'yyyy-MM-dd HH:mm')} para: ${appointment.phone}`))
+  console.log(chalk.green(`Recordatorio programado (${appointment.id_appointment}) : ${formatInTimeZone(dateReminder, timeZone, 'yyyy-MM-dd HH:mm')} para: ${appointment.phone}`))
+  console.log('programNotify: ' , reminderJobs)
 }
 
 export const deleteNotify = (appointment: AppointmentClientDTO) => {
@@ -40,7 +38,9 @@ export const deleteNotify = (appointment: AppointmentClientDTO) => {
   }
   job.cancel()
   reminderJobs.delete(appointment.id_appointment)
+  
   const day = new Date(appointment.day).toISOString().split('T')[0]
   const date = day + 'T' + appointment.hour
   console.log(chalk.green(`Recordatorio cancelado de cita: ${date} para: ${appointment.phone}`))
+  console.log('deleteNotify: ' , reminderJobs)
 }

@@ -14,7 +14,7 @@ export const clientAskAppValidator = async (
   Si el mensaje del cliente está correcto según el tipo de dato que has pedido, responde con la acción aceptar.
   Caso contrario, responde con la acción salir.
   Responde solo la acción. No incluyas ningún otro texto.
-  Recuerda que el doctor no trabaja los domingos.
+  El único día que el doctor no trabaja es el domingo.
   `
 
   const option = (await askToAI(message, instructions) as string).toLocaleLowerCase().trim() 

@@ -36,7 +36,6 @@ export const appointmentInWorkHours = async (
   const hour = `${dataClient.hour}:00`
 
   for (const { start, end } of hours) {
-    console.log('start: ', start, 'end: ', end, 'hour: ', hour)
     if (start <= hour && hour < end) {
       return true
     }

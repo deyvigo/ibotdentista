@@ -28,4 +28,5 @@ export interface SessionDoctorService {
 
 export type DoctorFlow = 'bienvenida' | 'horario' | 'ver-citas' | 'cancelar' | 'consultas' | 'crear-servicio' | 'informacion-bot'
 
-export type ClientFlow = 'bienvenida' | 'servicios' | 'horario-doctor' | 'consultas' | 'solicitar-cita' | 'cancelar-cita' | 'citas-creadas' | 'informacion-bot' | 'direccion'
+export type ClientFlow = 'bienvenida' | 'servicios' | 'horario-doctor' | 'consultas' | 'solicitar-cita' | 'cancelar-cita' | 'citas-creadas' | 'informacion-bot' | 'direccion' | 'reprogramar-cita' | 'opcional-cita'
+// 'opcional-cita' es para cuando el doctor le cancela la cita a un cliente y se le pide si quiere programar otra cita

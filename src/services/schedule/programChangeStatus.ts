@@ -23,7 +23,8 @@ export const programChangeStatusAppointment = (appointment: AppointmentClientDTO
 
   deleteJobs.set(appointment.id_appointment, job)
 
-  console.log(chalk.cyan(`La cita ${dateInTimeZone} cambiará de estado a "attended" en ${formatInTimeZone(dateChangeReminder, 'America/Lima', 'yyyy-MM-dd HH:mm')}`))
+  console.log(chalk.cyan(`La cita (${appointment.id_appointment}) ${dateInTimeZone} cambiará de estado a "attended" en ${formatInTimeZone(dateChangeReminder, 'America/Lima', 'yyyy-MM-dd HH:mm')}`))
+  console.log('programChangeStatusAppointment: ' , deleteJobs)
 }
 
 export const deleteReminderChangeStatus = (appointment: AppointmentClientDTO) => {
@@ -31,7 +32,9 @@ export const deleteReminderChangeStatus = (appointment: AppointmentClientDTO) =>
   if (!job) return
   job.cancel()
   deleteJobs.delete(appointment.id_appointment)
+  
   const day = new Date(appointment.day).toISOString().split('T')[0]
   const dateInTimeZone = day + 'T' + appointment.hour
   console.log(chalk.cyan(`El recordatorio de cambio de estado de la cita ${dateInTimeZone} ha sido cancelado`))
+  console.log('deleteReminderChangeStatus: ' , deleteJobs)
 }
