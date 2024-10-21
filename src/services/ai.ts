@@ -1,5 +1,6 @@
 import OpenAI from 'openai'
 import dotenv from 'dotenv'
+import { ResponseFormatJSONObject, ResponseFormatJSONSchema, ResponseFormatText } from 'openai/resources'
 
 dotenv.config()
 
@@ -12,7 +13,11 @@ type Message = {
   content: string
 }
 
-export const askToAI = async (question: string, systemMessages?: string, ) => {
+export const askToAI = async (
+  question: string,
+  typeResponse: 'text' | 'json_object' | 'json_schema',
+  systemMessages?: string
+) => {
   const messages: Message[] = []
 
   // predefine system messages
@@ -28,7 +33,8 @@ export const askToAI = async (question: string, systemMessages?: string, ) => {
 
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
-    messages: messages
+    messages: messages,
+    response_format: { 'type': typeResponse } as ResponseFormatJSONObject | ResponseFormatJSONSchema | ResponseFormatText
   })
 
   return completion.choices[0].message.content

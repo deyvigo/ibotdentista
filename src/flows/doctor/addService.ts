@@ -48,7 +48,7 @@ export const addService = async (socket: WASocket, messageInfo: proto.IWebMessag
       Objeto JSON generado:
       `
 
-      const data = await askToAI(prompt) as string
+      const data = await askToAI(prompt, 'text') as string
       const jsonData = JSON.parse(data) as CreateServiceDTO
 
       const doctor = await DoctorRepository.getDoctors()
