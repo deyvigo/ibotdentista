@@ -34,7 +34,7 @@ export const mainFlowDoctor = async (socket: WASocket, messageInfo: proto.IWebMe
   let session = userSessions.get(from) || { step: 0, flow: '', payload: {} }
 
   if (session.flow !== 'cancelar' && session.flow !== 'crear-servicio') {
-    session.flow = (await askToAI(messageText, instructions) as string).trim() as DoctorFlow
+    session.flow = (await askToAI(messageText, 'text', instructions) as string).trim() as DoctorFlow
   }
 
   console.log('user: ', from, 'session: ', session)

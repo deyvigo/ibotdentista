@@ -12,7 +12,7 @@ export const consultations = async (socket: WASocket, messageInfo: proto.IWebMes
   No puedes mandar una respuesta vacía.
   `
 
-  const aiResponse = await askToAI(messageText, instructions) as string
+  const aiResponse = await askToAI(messageText, 'text', instructions) as string
 
   await sendText(socket, from!, aiResponse)
 }

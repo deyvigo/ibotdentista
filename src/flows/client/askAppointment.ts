@@ -37,7 +37,7 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
     case 1:
       // TODO: Aprovechando que se dio el día de la cita, traer una imagen con los horarios disponibles para ese día
       if (
-        !await clientAskAppValidator(socket, messageText, from, session, 'un día para agendar la cita (puede ser hoy también y los sabados)')
+        !await clientAskAppValidator(socket, messageText, from, session, 'Ahora le estás pidiendo un día para agendar la cita (puede ser hoy, mañana, o un día de la semana, incluyendo los sábados, excepto domingos)')
       ) return
 
       clientPayload.day = messageText
@@ -67,7 +67,7 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
       Objeto JSON generado:
       `
 
-      const dayHour = await askToAI(prompt) as string
+      const dayHour = await askToAI(prompt, 'json_object') as string
 
       const jData = JSON.parse(dayHour) as SessionClientAppointment
 
@@ -132,7 +132,7 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
       Objeto JSON generado:
       `
 
-      const data = await askToAI(message) as string
+      const data = await askToAI(message, 'json_object') as string
 
       const jsonData = JSON.parse(data) as SessionClientAppointment
 

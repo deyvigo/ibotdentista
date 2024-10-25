@@ -15,7 +15,7 @@ export const doctorServiceValidator = async (
   Recuerda que el doctor no trabaja los domingos.
   `
 
-  const option = (await askToAI(message, instructions) as string).toLocaleLowerCase().trim() 
+  const option = (await askToAI(message, 'text', instructions) as string).toLocaleLowerCase().trim() 
 
   if (option === 'salir') {
     console.log('Saliendo del flujo del doctor...')

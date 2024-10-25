@@ -18,7 +18,7 @@ export const viewDaySchedule = async (socket: WASocket, messageInfo: proto.IWebM
   En caso de que el cliente no haga referecia a una fecha, responde con la fecha actual.
   `
 
-  const aiResponse = await askToAI(messageText, instructions) as string
+  const aiResponse = await askToAI(messageText, 'text', instructions) as string
   const daySchedule = await AppointmentRepository.getAllByDay(aiResponse)
 
   const imgBuffer = createDayScheduleImage(formatDate(new Date(aiResponse + 'T00:00:00')), daySchedule)

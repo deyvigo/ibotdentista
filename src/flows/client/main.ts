@@ -41,7 +41,7 @@ export const mainFlowClient = async (socket: WASocket, messageInfo: proto.IWebMe
 
   // Si el mensaje es solicitar-cita, no preguntar a la ia porque el flujo se rompe desde dentro
   if (session.flow !== 'solicitar-cita' && session.flow !== 'reprogramar-cita' && session.flow !== 'opcional-cita') {
-    session.flow = (await askToAI(messageText, instructions) as string).trim() as ClientFlow
+    session.flow = (await askToAI(messageText, 'text', instructions) as string).trim() as ClientFlow
   }
 
   console.log('user: ', from, 'session: ', session)
@@ -76,6 +76,8 @@ export const mainFlowClient = async (socket: WASocket, messageInfo: proto.IWebMe
       break
     case 'citas-creadas':
       consultAppointment(socket, messageInfo)
+      break
+    case 'opcional-cita':
       break
   }
 

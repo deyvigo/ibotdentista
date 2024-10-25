@@ -1,15 +1,11 @@
 import makeWASocket, { DisconnectReason, useMultiFileAuthState } from '@whiskeysockets/baileys'
 import { Boom } from '@hapi/boom'
 import { createDatabase } from './services/connection'
-
 import 'dotenv/config'
 import { mainFlow } from './flows/main'
 import { AppointmentRepository } from './repositories/appointment'
 import { programNotify } from './services/schedule/programNotify'
 import { programChangeStatusAppointment } from './services/schedule/programChangeStatus'
-
-// Create database
-createDatabase()
 
 const connectToWhatsApp = async () => {
   const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys')
@@ -59,4 +55,9 @@ const connectToWhatsApp = async () => {
   }
 }
 
-connectToWhatsApp()
+const initializeApp = async () => {
+  await createDatabase()
+  await connectToWhatsApp()
+}
+
+initializeApp()

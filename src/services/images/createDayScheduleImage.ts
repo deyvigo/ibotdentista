@@ -116,7 +116,7 @@ export const createDayScheduleImage = (day: string, daySchedule: AppointmentDoct
   const dayToIndex = {
     'lunes': 0,
     'martes': 1,
-    'miércoles': 2,
+    'miercoles': 2,
     'jueves': 3,
     'viernes': 4,
     'sábado': 5

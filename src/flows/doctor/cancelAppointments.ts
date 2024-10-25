@@ -74,7 +74,7 @@ export const cancelAppointments = async (
       Objeto JSON generado:
       `
 
-      const data = await askToAI(message) as string
+      const data = await askToAI(message, 'json_object') as string
 
       console.log('data: ', data)
       const jsonData = JSON.parse(data) as SessionDoctorSchedule[]

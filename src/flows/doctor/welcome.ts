@@ -15,7 +15,7 @@ export const welcomeDoctor = async (socket: WASocket, messageInfo: proto.IWebMes
   Caso contrario, respondes la pregunta sin saludar.
   `
 
-  const aiResponse = (await askToAI(messageText,instructions) as string).trim()
+  const aiResponse = (await askToAI(messageText, 'text', instructions) as string).trim()
 
   // if (aiResponse === 'saludo') {
   //   await sendText(socket, from!, '¡Hola! Soy tu asistente inteligente ¿En qué puedo ayudarte?')

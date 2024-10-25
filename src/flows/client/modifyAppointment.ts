@@ -64,7 +64,7 @@ export const modifyAppointment = async (
       Objeto JSON generado:
       `
 
-      const dayHour = await askToAI(prompt) as string
+      const dayHour = await askToAI(prompt, 'json_object') as string
       const jData = JSON.parse(dayHour) as SessionClientAppointment
 
       // comprobar que la hora y dia no sean pasados

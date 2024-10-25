@@ -17,7 +17,7 @@ export const clientAskAppValidator = async (
   El único día que el doctor no trabaja es el domingo.
   `
 
-  const option = (await askToAI(message, instructions) as string).toLocaleLowerCase().trim() 
+  const option = (await askToAI(message, 'text', instructions) as string).toLocaleLowerCase().trim()
 
   if (option === 'salir') {
     console.log('Saliendo del flujo de cliente...')

@@ -14,7 +14,7 @@ export const welcomeClient = async (socket: WASocket, messageInfo: proto.IWebMes
   Caso contrario, respondes la pregunta sin saludar.
   `
 
-  const aiResponse = (await askToAI(messageText, instructions) as string).trim()
+  const aiResponse = (await askToAI(messageText, 'text', instructions) as string).trim()
 
   // if (aiResponse === 'saludo') {
   //   await sendText(socket, from!, 'Hola. Soy Leopoldo, el asistente de la Clínica Dental Tapia y Asociados.')

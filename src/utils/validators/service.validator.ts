@@ -15,7 +15,7 @@ export const serviceDoctorValidator = async (
   Respuesta ideal: (salir|aceptar)
   `
 
-  const option = await askToAI(prompt) as string
+  const option = await askToAI(prompt, 'text') as string
 
   if (option === 'salir') {
     console.log('Saliendo del flujo de servicio...')
