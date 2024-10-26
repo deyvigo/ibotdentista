@@ -1,6 +1,6 @@
 import { ResultSetHeader } from 'mysql2'
-import { CreateServiceDTO, ServiceDTO } from '../interfaces/service.interface'
-import { dbConnection } from '../services/connection'
+import { CreateServiceDTO, ServiceDTO } from '@interfaces/service.interface'
+import { dbConnection } from '@services/connection'
 
 export class ServiceRepository {
   static getServices = async() => {

@@ -1,8 +1,8 @@
 import { ResultSetHeader } from 'mysql2'
-import { dbConnection } from '../services/connection'
-import { AppointmentClientDTO, AppointmentDoctorDTO, AppointmentDTO, CreateAppointmentDTO } from '../interfaces/appointment.interface'
-import { SessionDoctorSchedule } from '../interfaces/session.interface'
-import { DateState } from '../utils/date'
+import { dbConnection } from '@services/connection'
+import { AppointmentClientDTO, AppointmentDoctorDTO, AppointmentDTO, CreateAppointmentDTO } from '@interfaces/appointment.interface'
+import { SessionDoctorSchedule } from '@interfaces/session.interface'
+import { DateState } from '@utils/date'
 
 export class AppointmentRepository {
   static getDoctorAppointments = async (day: string) => {

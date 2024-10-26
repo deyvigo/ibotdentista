@@ -1,5 +1,5 @@
 import { RowDataPacket } from 'mysql2'
-import { DateState } from './../utils/date'
+import { DateState } from '@utils/date'
 
 // Interface to get appointment from database
 export interface AppointmentDTO extends RowDataPacket {

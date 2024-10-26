@@ -1,5 +1,5 @@
-import { Doctor } from '../interfaces/doctor.interface'
-import { dbConnection } from './../services/connection'
+import { Doctor } from '@interfaces/doctor.interface'
+import { dbConnection } from '@services/connection'
 
 export class DoctorRepository {
   static getDoctors = async () => {

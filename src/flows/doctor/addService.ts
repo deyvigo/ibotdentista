@@ -1,11 +1,11 @@
 import { proto, WASocket } from '@whiskeysockets/baileys'
-import { Session, SessionDoctorService } from '../../interfaces/session.interface'
-import { sendText } from '../../services/bot/sendText'
-import { serviceDoctorValidator } from '../../utils/validators/service.validator'
-import { askToAI } from '../../services/ai'
-import { DoctorRepository } from '../../repositories/doctor'
-import { ServiceRepository } from '../../repositories/service'
-import { CreateServiceDTO } from '../../interfaces/service.interface'
+import { Session, SessionDoctorService } from '@interfaces/session.interface'
+import { sendText } from '@services/bot/sendText'
+import { serviceDoctorValidator } from '@utils/validators/service.validator'
+import { askToAI } from '@services/ai'
+import { DoctorRepository } from '@repositories/doctor'
+import { ServiceRepository } from '@repositories/service'
+import { CreateServiceDTO } from '@interfaces/service.interface'
 
 export const addService = async (socket: WASocket, messageInfo: proto.IWebMessageInfo, session: Session) => {
   const from = messageInfo.key.remoteJid as string

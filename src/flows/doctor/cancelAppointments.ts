@@ -1,13 +1,13 @@
 import { proto, WASocket } from '@whiskeysockets/baileys'
-import { Session, SessionDoctorSchedule } from '../../interfaces/session.interface'
-import { sendText } from '../../services/bot/sendText'
-import { formatDate } from '../../utils/formatDate'
-import { askToAI } from '../../services/ai'
-import { AppointmentRepository } from '../../repositories/appointment'
-import { DoctorRepository } from '../../repositories/doctor'
-import { doctorServiceValidator } from '../../utils/validators/doctorValidator'
-import { deleteNotify } from '../../services/schedule/programNotify'
-import { deleteReminderChangeStatus } from '../../services/schedule/programChangeStatus'
+import { Session, SessionDoctorSchedule } from '@interfaces/session.interface'
+import { sendText } from '@services/bot/sendText'
+import { formatDate } from '@utils/formatDate'
+import { askToAI } from '@services/ai'
+import { AppointmentRepository } from '@repositories/appointment'
+import { DoctorRepository } from '@repositories/doctor'
+import { doctorServiceValidator } from '@utils/validators/doctorValidator'
+import { deleteNotify } from '@services/schedule/programNotify'
+import { deleteReminderChangeStatus } from '@services/schedule/programChangeStatus'
 
 export const cancelAppointments = async (
   socket: WASocket, messageInfo: proto.IWebMessageInfo, session: Session

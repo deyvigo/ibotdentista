@@ -1,10 +1,10 @@
 import { proto, WASocket } from '@whiskeysockets/baileys'
-import { formatDate } from '../../utils/formatDate'
-import { askToAI } from '../../services/ai'
-import { AppointmentRepository } from '../../repositories/appointment'
-import { createDayScheduleImage } from '../../services/images/createDayScheduleImage'
-import { sendImage } from '../../services/bot/sendImage'
-import { sendText } from '../../services/bot/sendText'
+import { formatDate } from '@utils/formatDate'
+import { askToAI } from '@services/ai'
+import { AppointmentRepository } from '@repositories/appointment'
+import { createDayScheduleImage } from '@services/images/createDayScheduleImage'
+import { sendImage } from '@services/bot/sendImage'
+import { sendText } from '@services/bot/sendText'
 
 export const viewDaySchedule = async (socket: WASocket, messageInfo: proto.IWebMessageInfo) => {
   const from = messageInfo.key.remoteJid as string

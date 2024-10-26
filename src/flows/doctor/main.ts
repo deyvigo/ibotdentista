@@ -1,6 +1,6 @@
 import { proto, WASocket } from '@whiskeysockets/baileys'
-import { Session, DoctorFlow } from '../../interfaces/session.interface'
-import { askToAI } from '../../services/ai'
+import { Session, DoctorFlow } from '@interfaces/session.interface'
+import { askToAI } from '@services/ai'
 import { welcomeDoctor } from './welcome'
 import { consultation } from './consultations'
 import { scheduleDoctor } from './schedule'

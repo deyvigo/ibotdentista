@@ -1,5 +1,5 @@
-import { ScheduleDTO } from '../interfaces/schedule.interface'
-import { dbConnection } from '../services/connection'
+import { ScheduleDTO } from '@interfaces/schedule.interface'
+import { dbConnection } from '@services/connection'
 
 export class ScheduleRepository {
   static getSchedule = async () => {

@@ -1,5 +1,5 @@
 import { createCanvas } from 'canvas'
-import { ScheduleDTO } from './../../interfaces/schedule.interface'
+import { ScheduleDTO } from '@interfaces/schedule.interface'
 
 export const createScheduleImage = (schedule: ScheduleDTO[]) => {
   const mainWidth = 880

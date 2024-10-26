@@ -1,5 +1,5 @@
 import { createCanvas } from 'canvas'
-import { AppointmentDoctorDTO } from '../../interfaces/appointment.interface'
+import { AppointmentDoctorDTO } from '@interfaces/appointment.interface'
 
 export const createDayScheduleImage = (day: string, daySchedule: AppointmentDoctorDTO[]) => {
   const mainWidth = 580

@@ -1,9 +1,9 @@
 import { proto, WASocket } from '@whiskeysockets/baileys'
-import { ClientRepository } from '../../repositories/client'
-import { sendText } from '../../services/bot/sendText'
-import { AppointmentRepository } from '../../repositories/appointment'
-import { deleteNotify } from '../../services/schedule/programNotify'
-import { deleteReminderChangeStatus } from '../../services/schedule/programChangeStatus'
+import { ClientRepository } from '@repositories/client'
+import { sendText } from '@services/bot/sendText'
+import { AppointmentRepository } from '@repositories/appointment'
+import { deleteNotify } from '@services/schedule/programNotify'
+import { deleteReminderChangeStatus } from '@services/schedule/programChangeStatus'
 
 export const cancelAppointment = async (socket: WASocket, messageInfo: proto.IWebMessageInfo) => {
   const from = messageInfo.key.remoteJid as string

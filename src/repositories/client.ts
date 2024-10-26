@@ -1,6 +1,6 @@
 import { ResultSetHeader } from 'mysql2'
-import { ClientDTO, CreateClientDTO } from '../interfaces/client.interface'
-import { dbConnection } from '../services/connection'
+import { ClientDTO, CreateClientDTO } from '@interfaces/client.interface'
+import { dbConnection } from '@services/connection'
 
 export class ClientRepository {
   static getClientByNumber = async (number: string) => {

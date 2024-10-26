@@ -1,11 +1,10 @@
 import makeWASocket, { DisconnectReason, useMultiFileAuthState } from '@whiskeysockets/baileys'
 import { Boom } from '@hapi/boom'
-import { createDatabase } from './services/connection'
+import { createDatabase } from '@services/connection'
+import { mainFlow } from '@flows/main'
+import { AppointmentRepository } from '@repositories/appointment'
+import { programNotify } from '@services/schedule/programNotify'
 import 'dotenv/config'
-import { mainFlow } from './flows/main'
-import { AppointmentRepository } from './repositories/appointment'
-import { programNotify } from './services/schedule/programNotify'
-import { programChangeStatusAppointment } from './services/schedule/programChangeStatus'
 
 const connectToWhatsApp = async () => {
   const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys')
@@ -38,7 +37,6 @@ const connectToWhatsApp = async () => {
     if (messageUpdate.messages[0].message?.reactionMessage) {
       return
     }
-    // console.log(messageUpdate.messages[0])
     const message = messageUpdate.messages[0]
 
     // Verificar si el mensaje es del propio bot
@@ -51,7 +49,6 @@ const connectToWhatsApp = async () => {
   const appointments = await AppointmentRepository.getPendingAppointments()
   for (const appointment of appointments) {
     programNotify(socket, appointment, -30)
-    programChangeStatusAppointment(appointment, 'attended')
   }
 }
 

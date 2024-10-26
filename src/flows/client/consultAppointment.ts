@@ -1,8 +1,8 @@
 import { proto, WASocket } from '@whiskeysockets/baileys'
-import { AppointmentRepository } from '../../repositories/appointment'
-import { sendText } from '../../services/bot/sendText'
-import { createAppointmentImage } from '../../services/images/createAppointmentImage'
-import { sendImage } from '../../services/bot/sendImage'
+import { AppointmentRepository } from '@repositories/appointment'
+import { sendText } from '@services/bot/sendText'
+import { createAppointmentImage } from '@services/images/createAppointmentImage'
+import { sendImage } from '@services/bot/sendImage'
 
 export const consultAppointment = async (socket: WASocket, messageInfo: proto.IWebMessageInfo) => {
   const from = messageInfo.key.remoteJid as string

@@ -1,10 +1,10 @@
 import { parseISO } from 'date-fns'
-import { AppointmentClientDTO } from '../../interfaces/appointment.interface'
 import schedule from 'node-schedule'
-import { AppointmentRepository } from '../../repositories/appointment'
 import chalk from 'chalk'
-import { DateState } from '../../utils/date'
 import { formatInTimeZone } from 'date-fns-tz'
+import { DateState } from '@utils/date'
+import { AppointmentClientDTO } from '@interfaces/appointment.interface'
+import { AppointmentRepository } from '@repositories/appointment'
 
 const deleteJobs = new Map()
 

@@ -1,8 +1,8 @@
 import { proto, WASocket } from '@whiskeysockets/baileys'
-import { ScheduleRepository } from '../../repositories/schedule'
-import { sendText } from '../../services/bot/sendText'
-import { createScheduleImage } from '../../services/images/createScheduleImage'
-import { sendImage } from '../../services/bot/sendImage'
+import { ScheduleRepository } from '@repositories/schedule'
+import { sendText } from '@services/bot/sendText'
+import { createScheduleImage } from '@services/images/createScheduleImage'
+import { sendImage } from '@services/bot/sendImage'
 
 export const scheduleDoctor = async (socket: WASocket, messageInfo: proto.IWebMessageInfo) => {
   const from = messageInfo.key.remoteJid as string

@@ -119,7 +119,7 @@ export const createDatabase = async () => {
 
   try {
     await dbConnection.query('begin')
-    
+
     await dbConnection.query(queryClient)
     await dbConnection.query(queryDoctor)
     await dbConnection.query(queryAdmin)

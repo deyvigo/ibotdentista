@@ -1,13 +1,13 @@
 import { proto, WASocket } from '@whiskeysockets/baileys'
-import { Session, SessionClientAppointment } from '../../interfaces/session.interface'
-import { sendText } from '../../services/bot/sendText'
-import { clientAskAppValidator } from '../../utils/validators/clientValidator'
-import { appointmentHourIsAvailable, appointmentInWorkHours, appointmentIsPast } from '../../utils/validators/appointment'
-import { askToAI } from '../../services/ai'
-import { deleteNotify, programNotify } from '../../services/schedule/programNotify'
-import { AppointmentRepository } from '../../repositories/appointment'
-import { deleteReminderChangeStatus, programChangeStatusAppointment } from '../../services/schedule/programChangeStatus'
-import { formatDate } from '../../utils/formatDate'
+import { Session, SessionClientAppointment } from '@interfaces/session.interface'
+import { sendText } from '@services/bot/sendText'
+import { clientAskAppValidator } from '@utils/validators/clientValidator'
+import { appointmentHourIsAvailable, appointmentInWorkHours, appointmentIsPast } from '@utils/validators/appointment'
+import { askToAI } from '@services/ai'
+import { deleteNotify, programNotify } from '@services/schedule/programNotify'
+import { AppointmentRepository } from '@repositories/appointment'
+import { deleteReminderChangeStatus, programChangeStatusAppointment } from '@services/schedule/programChangeStatus'
+import { formatDate } from '@utils/formatDate'
 
 export const modifyAppointment = async (
   socket: WASocket, messageInfo: proto.IWebMessageInfo, session: Session

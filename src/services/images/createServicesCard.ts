@@ -1,5 +1,5 @@
 import { createCanvas } from 'canvas'
-import { ServiceDTO } from './../../interfaces/service.interface'
+import { ServiceDTO } from '@interfaces/service.interface'
 
 export const createServicesCard = (data: ServiceDTO[]) => {
   const heightService = 80

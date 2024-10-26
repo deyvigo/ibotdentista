@@ -1,6 +1,6 @@
 import { createCanvas } from 'canvas'
-import { AppointmentClientDTO } from '../../interfaces/appointment.interface'
-import { formatDate } from '../../utils/formatDate'
+import { AppointmentClientDTO } from '@interfaces/appointment.interface'
+import { formatDate } from '@utils/formatDate'
 
 export const createAppointmentImage = (appointment: AppointmentClientDTO) => {
   const width = 700

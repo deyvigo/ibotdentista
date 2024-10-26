@@ -1,10 +1,10 @@
 import { parseISO } from 'date-fns'
 import schedule from 'node-schedule'
-import { AppointmentClientDTO } from '../../interfaces/appointment.interface'
-import { sendText } from '../bot/sendText'
-import { WASocket } from '@whiskeysockets/baileys'
 import { formatInTimeZone } from 'date-fns-tz'
 import chalk from 'chalk'
+import { AppointmentClientDTO } from '@interfaces/appointment.interface'
+import { sendText } from '@services/bot/sendText'
+import { WASocket } from '@whiskeysockets/baileys'
 
 const reminderJobs = new Map()
 
