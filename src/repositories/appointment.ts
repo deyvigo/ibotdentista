@@ -1,6 +1,6 @@
 import { ResultSetHeader } from 'mysql2'
 import { dbConnection } from '@services/connection'
-import { AppointmentClientDTO, AppointmentDoctorDTO, AppointmentDTO, CreateAppointmentDTO } from '@interfaces/appointment.interface'
+import { AppointmentClientDTO, AppointmentDoctorDTO, AppointmentDTO, AppointmentIntervalDTO, CreateAppointmentDTO } from '@interfaces/appointment.interface'
 import { SessionDoctorSchedule } from '@interfaces/session.interface'
 import { DateState } from '@utils/date'
 
@@ -38,13 +38,31 @@ export class AppointmentRepository {
     FROM appointment a
     JOIN client c ON a.id_client = c.id_client
     JOIN doctor d ON a.id_doctor = d.id_doctor
-    WHERE c.phone = ? AND a.state = 'pending';
+    WHERE c.phone = ? AND a.state = 'pending'
+    LIMIT 1;
     `
     try {
       const [rows] = await dbConnection.query<AppointmentClientDTO[]>(query, [clientNumber])
       return rows
     } catch (error) {
       console.error('Error getting appointment by client number: ', error)
+      return []
+    }
+  }
+
+  static getById = async (idAppointment: string) => {
+    const query = `
+    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, c.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name
+    FROM appointment a
+    JOIN client c ON a.id_client = c.id_client
+    JOIN doctor d ON a.id_doctor = d.id_doctor
+    WHERE a.id_appointment = ?;
+    `
+    try {
+      const [rows] = await dbConnection.query<AppointmentClientDTO[]>(query, [idAppointment])
+      return rows
+    } catch (error) {
+      console.error('Error getting appointment by id: ', error)
       return []
     }
   }
@@ -91,7 +109,7 @@ export class AppointmentRepository {
     }
   }
 
-  static cancelDayInterval = async (intervals: SessionDoctorSchedule[], idDoctor: string, ) => {
+  static cancelDayInterval = async (intervals: AppointmentIntervalDTO[], idDoctor: string, ) => {
     const connection = await dbConnection.getConnection()
     try {
       await connection.beginTransaction()
@@ -172,7 +190,7 @@ export class AppointmentRepository {
   }
 
   static updateAppointmentById = async (idAppointment: string, day: string, hour: string) => {
-    const query = `UPDATE appointment SET day = ?, hour = ? WHERE id_appointment = ?;`
+    const query = `UPDATE appointment SET day = ?, hour = ?, state = 'pending' WHERE id_appointment = ?;`
     try {
       const [resul] = await dbConnection.query<ResultSetHeader>(query, [day, hour, idAppointment])
       if (resul.affectedRows === 0) return 'No se pudo actualizar la cita'

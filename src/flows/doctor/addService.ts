@@ -1,7 +1,7 @@
 import { proto, WASocket } from '@whiskeysockets/baileys'
 import { Session, SessionDoctorService } from '@interfaces/session.interface'
 import { sendText } from '@services/bot/sendText'
-import { serviceDoctorValidator } from '@utils/validators/service.validator'
+import { serviceDataCreateValidator } from '@utils/validators/service.validator'
 import { askToAI } from '@services/ai'
 import { DoctorRepository } from '@repositories/doctor'
 import { ServiceRepository } from '@repositories/service'
@@ -22,18 +22,18 @@ export const addService = async (socket: WASocket, messageInfo: proto.IWebMessag
       break
     case 1:
       if (
-        !await serviceDoctorValidator(socket, from!, session, messageText, 'un nombre de un servicio de dentista')
+        !await serviceDataCreateValidator(socket, from!, session, messageText, 'un nombre para un servicio nuevo del consultorio')
       ) return
 
       clientPayload.name = messageText
       session.payload = clientPayload
       session.step += 1
 
-      await sendText(socket, from!, '¿Cuál es el precio del servicio?')
+      await sendText(socket, from!, '¿Cuál es la descripción del servicio?')
       break
     case 2:
       if (
-        await serviceDoctorValidator(socket, from!, session, messageText, 'un precio, número o dinero')
+        !await serviceDataCreateValidator(socket, from!, session, messageText, `una descripción del servicio ${clientPayload.name}`)
       ) return
 
       const prompt = `
@@ -42,8 +42,9 @@ export const addService = async (socket: WASocket, messageInfo: proto.IWebMessag
       Deber generar un objeto JSON con la siguiente estructura:
       {
         "name": "Nombre del servicio.",
-        "cost": "Precio del servicio (solo número)."
+        "description": "Pequeña descripción del servicio."
       }
+      A poder ser, mejora la descripción del servicio, pero sé muy breve.
       Responde solo con el objeto JSON. No incluyas ningún otro texto.
       Objeto JSON generado:
       `

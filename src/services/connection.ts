@@ -95,11 +95,11 @@ export const createDatabase = async () => {
   const queryService = `
     create table if not exists service
     (
-      id_service uuid           not null
+      id_service   uuid           not null
         primary key,
-      name       varchar(100)   not null,
-      cost       decimal(10,2)  not null,
-      id_doctor  uuid           not null,
+      name         varchar(100)   not null,
+      description  text           not null,
+      id_doctor    uuid           not null,
       constraint service_doctor_id_doctor_fk
         foreign key (id_doctor) references doctor (id_doctor)
     );

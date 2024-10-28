@@ -42,3 +42,10 @@ export interface AppointmentDoctorDTO extends RowDataPacket {
   phone: string
   state: DateState
 }
+
+// To generate intervals for appointments
+export interface AppointmentIntervalDTO {
+  day: string,
+  start: string,
+  end: string
+}

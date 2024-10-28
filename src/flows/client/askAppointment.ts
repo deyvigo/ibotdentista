@@ -37,7 +37,7 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
     case 1:
       // TODO: Aprovechando que se dio el día de la cita, traer una imagen con los horarios disponibles para ese día
       if (
-        !await clientAskAppValidator(socket, messageText, from, session, 'Ahora le estás pidiendo un día para agendar la cita (puede ser hoy, mañana, o un día de la semana, incluyendo los sábados, excepto domingos)')
+        !await clientAskAppValidator(socket, messageText, from, session, 'un día para agendar la cita (puede ser hoy, mañana, o un día de la semana, incluyendo los sábados, excepto domingos)')
       ) return
 
       clientPayload.day = messageText
@@ -68,10 +68,7 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
       `
 
       const dayHour = await askToAI(prompt, 'json_object') as string
-
       const jData = JSON.parse(dayHour) as SessionClientAppointment
-
-      console.log('jData: ', jData)
 
       // comprobar que la hora y dia no sean pasados
       if (appointmentIsPast(socket, jData, from, session)) return
@@ -125,8 +122,8 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
         "day": "Día de la cita en formato YYYY-MM-DD. No puede ser un día pasado.",
         "hour": "Hora de la cita en formato HH:MM (24 horas).",
         "dni": "DNI del cliente (cadena de 8 dígitos).",
-        "fullname": "Nombre completo del cliente.",
-        "reason": "Motivo de la cita."
+        "fullname": "Nombre completo del cliente (capitalice y con espacios).",
+        "reason": "Motivo de la cita (capitalice y con espacios)."
       }
       Responde solo con el objeto JSON. No incluyas ningún otro texto. Ni delimitadores.
       Objeto JSON generado:
@@ -158,10 +155,8 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
 
         // establish reminder to change status to attended and send notification to client
         const appointment = await AppointmentRepository.getAppointmentByClientNumber(clientNumber)
-        console.log('appointment: ', appointment)
         if (appointment.length > 0) {
           programNotify(socket, appointment[0], -30)
-          programChangeStatusAppointment(appointment[0], 'attended')
         }
       }
 

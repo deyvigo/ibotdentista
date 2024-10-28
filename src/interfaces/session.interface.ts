@@ -28,7 +28,7 @@ export interface SessionDoctorService {
 
 // Interface opcional para cuando el doctor le cancela la cita a un cliente y se le pide si quiere programar otra cita
 export interface SessionClientAppointmentOptional {
-  id_appointment: number,
+  id_appointment: string,
   day: string,
   hour: string,
 }

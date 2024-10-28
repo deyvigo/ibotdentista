@@ -1,13 +1,16 @@
 import { proto, WASocket } from '@whiskeysockets/baileys'
-import { Session, SessionDoctorSchedule } from '@interfaces/session.interface'
+import { Session, SessionDoctorSchedule, SessionClientAppointmentOptional } from '@interfaces/session.interface'
 import { sendText } from '@services/bot/sendText'
-import { formatDate } from '@utils/formatDate'
 import { askToAI } from '@services/ai'
 import { AppointmentRepository } from '@repositories/appointment'
 import { DoctorRepository } from '@repositories/doctor'
-import { doctorServiceValidator } from '@utils/validators/doctorValidator'
+import { doctorTakeDayFreeValidator } from '@utils/validators/doctorValidator'
 import { deleteNotify } from '@services/schedule/programNotify'
-import { deleteReminderChangeStatus } from '@services/schedule/programChangeStatus'
+import { AppointmentIntervalDTO } from '@/interfaces/appointment.interface'
+import { generateIntervals } from '@/utils/generateIntervals'
+import { BlockTimeRepository } from '@/repositories/blockTime'
+import { userSession } from '../client/main'
+import { formatDate } from '@utils/formatDate'
 
 export const cancelAppointments = async (
   socket: WASocket, messageInfo: proto.IWebMessageInfo, session: Session
@@ -26,7 +29,10 @@ export const cancelAppointments = async (
       break
     case 1:
       if (
-        !await doctorServiceValidator(socket, messageText, from, session, 'un día de la semana o un día o una fecha (puede ser hoy)')
+        !await doctorTakeDayFreeValidator(
+          socket, messageText, from, session,
+          'un día de la semana (lunes, martes, etc), una fecha o un sustantivo que haga referencia a un día (mañana, pasado, ayer, hoy, etc)'
+        )
       ) return
 
       doctorPayload.day = messageText.toLocaleLowerCase()
@@ -37,7 +43,10 @@ export const cancelAppointments = async (
       break
     case 2:
       if (
-        !await doctorServiceValidator(socket, messageText, from, session, 'un número de hora o una hora')
+        !await doctorTakeDayFreeValidator(
+          socket, messageText, from, session,
+          'una hora inicial para cancelar las citas o solo un número que represente una hora del día'
+        )
       ) return
 
       doctorPayload.start = messageText
@@ -48,7 +57,9 @@ export const cancelAppointments = async (
       break
     case 3:
       if (
-        !await doctorServiceValidator(socket, messageText, from, session, 'un número de hora o una hora')
+        !await doctorTakeDayFreeValidator(
+          socket, messageText, from, session,
+          `una hora del día mayor a ${doctorPayload.start} en cualquier formato`)
       ) return
 
       doctorPayload.end = messageText
@@ -57,38 +68,29 @@ export const cancelAppointments = async (
       sendText(socket, from!, 'Gracias. Ahora cancelaré las citas dentro de ese intervalo de tiempo.')
 
       const message = `
-      Siendo hoy ${formatDate(new Date())}.
       Tu tarea principal es analizar la información enviada por el dentista.
       Información del dentista: ${JSON.stringify(doctorPayload)}
       Debes generar un objeto JSON con la siguiente estructura teniendo en cuenta la información del dentista.
-      Ignora los intervalos 12-1 y 1-2 de la tarde porque son horarios de almuerzo.
-      Debes considerar intervalos de 1 hora de tiempo en cada objeto del arreglo:
-      [
-        {
-          "day": "Día en formato YYYY-MM-DD. Llevar al día más cercano en el futuro",
-          "start": "Hora de inicio en formato HH:MM (24 horas)",
-          "end": "Hora final en formato HH:MM (24 horas)",
-        },
-      ]
-      Responde solo el arrego del objeto JSON. No incluyas ningún otro texto ni ningún delimitador.
-      Objeto JSON generado:
+      Ejemplo de estructura del arreglo:
+      {
+        "day": "Día en formato YYYY-MM-DD. Llevar al día más cercano en el futuro",
+        "start": "Hora de inicio en formato HH:MM:00 (24 horas)",
+        "end": "Hora final en formato HH:MM:00 (24 horas)",
+      }
       `
 
       const data = await askToAI(message, 'json_object') as string
+      const jsonData = JSON.parse(data) as AppointmentIntervalDTO
 
-      console.log('data: ', data)
-      const jsonData = JSON.parse(data) as SessionDoctorSchedule[]
-
-      console.log('jsonData: ', jsonData)
+      const intervals = generateIntervals(jsonData)
 
       // Para avisar a los usuarios que se les canceló la cita
-      const appoints = await AppointmentRepository.getByDayAndHourInteval(jsonData[0].day, jsonData[0].start, jsonData[jsonData.length - 1].end)
-      console.log('appoints: ', appoints)
+      const appoints = await AppointmentRepository.getByDayAndHourInteval(intervals[0].day, intervals[0].start, intervals[intervals.length - 1].end)
 
       const doctor = await DoctorRepository.getDoctors()
       const idDoctor = doctor[0].id_doctor
 
-      const result = await AppointmentRepository.cancelDayInterval(jsonData, idDoctor)
+      const result = await AppointmentRepository.cancelDayInterval(intervals, idDoctor)
 
       if (!result) {
         await sendText(socket, from!, 'No se pudo cancelar las citas. Por favor, inténtalo de nuevo.')
@@ -98,17 +100,30 @@ export const cancelAppointments = async (
         return
       }
 
-      if (result) {
-        for (const appointment of appoints) {
-          const number = appointment.phone + '@s.whatsapp.net'
-          await sendText(socket, number, 'Se ha cancelado tu cita por motivos personales del doctor.')
+      // Insert on blocktime table the intervals that were cancelled
+      for await (const interval of intervals) {
+        const { day, start, end } = interval
+        await BlockTimeRepository.createBlockTime({ day, start, end, id_doctor: idDoctor })
+      }
 
-          // delete notifications and reminders to change status to attended
-          deleteNotify(appointment)
-          deleteReminderChangeStatus(appointment)
+      for await (const appointment of appoints) {
+        const number = appointment.phone + '@s.whatsapp.net'
+        await sendText(socket, number, 'Se ha cancelado tu cita por motivos personales del doctor.')
 
-          // TODO: create a session client to new flow to update the appointment
+        // delete notifications
+        deleteNotify(appointment)
+
+        // TODO: create a session client to new flow to update the appointment
+
+        const appointmentOptional: SessionClientAppointmentOptional = {
+          id_appointment: appointment.id_appointment,
+          day: '',
+          hour: ''
         }
+
+        const numberClient = appointment.phone + '@s.whatsapp.net'
+        userSession.set(numberClient, { step: 0, flow: 'opcional-cita', payload: appointmentOptional })
+        await sendText(socket, numberClient, '¿Quieres reprogramar tu cita?')
       }
 
       await sendText(socket, from!, 'Las citas han sido canceladas.')

@@ -6,7 +6,6 @@ import { appointmentHourIsAvailable, appointmentInWorkHours, appointmentIsPast }
 import { askToAI } from '@services/ai'
 import { deleteNotify, programNotify } from '@services/schedule/programNotify'
 import { AppointmentRepository } from '@repositories/appointment'
-import { deleteReminderChangeStatus, programChangeStatusAppointment } from '@services/schedule/programChangeStatus'
 import { formatDate } from '@utils/formatDate'
 
 export const modifyAppointment = async (
@@ -78,7 +77,6 @@ export const modifyAppointment = async (
 
       // delete previous notifications and reminders to change status to attended
       deleteNotify(appointments[0])
-      deleteNotify(appointments[0])
 
       // Update appointment
       const result = await AppointmentRepository.updateAppointmentById(appointments[0].id_appointment, jData.day, jData.hour)
@@ -87,7 +85,6 @@ export const modifyAppointment = async (
       const newAppointment = await AppointmentRepository.getAppointmentByClientNumber(clientNumber)
       if (newAppointment.length > 0) {
         programNotify(socket, newAppointment[0], -30)
-        programChangeStatusAppointment(newAppointment[0], 'attended')
       }
 
       sendText(socket, from!, result)

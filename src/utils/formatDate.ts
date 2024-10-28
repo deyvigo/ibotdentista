@@ -4,5 +4,10 @@ export const formatDate = (date: Date) => {
   const month = new Intl.DateTimeFormat('es-ES', { month: 'long' }).format(date)
   const year = date.getFullYear()
   const dayString = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1)
-  return `${dayString}, ${day} de ${month} de ${year}`
+
+  const hours = date.getHours().toString().padStart(2, '0')
+  const minutes = date.getMinutes().toString().padStart(2, '0')
+  const seconds = date.getSeconds().toString().padStart(2, '0')
+
+  return `${dayString}, ${day} de ${month} de ${year} ${hours}:${minutes}:${seconds}`
 }

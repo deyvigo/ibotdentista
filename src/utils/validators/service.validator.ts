@@ -1,29 +1,40 @@
 import { WASocket } from '@whiskeysockets/baileys'
-import { Session } from '../../interfaces/session.interface'
-import { askToAI } from '../../services/ai'
-import { sendText } from '../../services/bot/sendText'
+import { Session } from '@interfaces/session.interface'
+import { askToAI } from '@services/ai'
+import { sendText } from '@services/bot/sendText'
+import { Validate } from './validator.interface'
 
-export const serviceDoctorValidator = async (
+/**
+ * @description This function return false if the type of data is not valid
+ */
+export const serviceDataCreateValidator = async (
   socket: WASocket, from: string, session: Session, message: string, validateCondition: string
 ) => {
-  const prompt = `
-  Eres un asistente chatbot de un dentista.
-  Estas creando un nuevo servicio.
-  Si el mensaje del usuario ${validateCondition}, responde con la acción salir.
-  Caso contrario, responde con la acción aceptar.
-  Mesaje del usuario: ${message}
-  Respuesta ideal: (salir|aceptar)
+  const instructions = `
+  Está solicitando datos al doctor para crear un nuevo servicio.
+  Ahora le estás pidiendo ${validateCondition}.
+  Si el mensaje del doctor está correcto según el tipo de dato que has pedido, responde con la acción aceptar.
+  Caso contrario, responde con la acción salir.
+  Debes responder un JSON con la siguiente estructura:
+  {
+    "action": "aceptar" | "salir",
+    "justification": "justifica al usuario la acción que estás respondiendo"
+  }
   `
 
-  const option = await askToAI(prompt, 'text') as string
+  console.log('Instructions: ', instructions)
 
-  if (option === 'salir') {
+  const response = await askToAI(message, 'text', instructions) as string
+  const resJson = await JSON.parse(response) as Validate
+
+  if (resJson.action.toLocaleLowerCase() === 'salir') {
     console.log('Saliendo del flujo de servicio...')
     session.flow = ''
     session.step = 0
-    sendText(socket, from!, 'Lo siento. No puedo crear el servicio porque has ingresado un dato incorrecto.')
-    return true
+    session.payload = {}
+    await sendText(socket, from!, resJson.justification)
+    return false
   }
 
-  return false
+  return true
 }

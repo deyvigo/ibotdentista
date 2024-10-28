@@ -5,9 +5,8 @@ export const informationDoctorBot = async (socket: WASocket, messageInfo: proto.
   const from = messageInfo.key.remoteJid as string
 
   await sendText(socket, from!, 'Las acciones con las que te puedo ayudar son:')
-  await sendText(socket, from!, 'Consultar tu horario de trabajo.') 
-  await sendText(socket, from!, 'Ver las citas que tienes que atender por día.')
-  await sendText(socket, from!, 'Pedir libre un intervalo de tiempo (para cuando no podrás atender las citas durante un intervalo de tiempo).')
-  await sendText(socket, from!, 'Puedes crear un nuevo servicio.')
-  await sendText(socket, from!, 'Puedes preguntar sobre tratamientos o pequeñas consultas dentales.')
+
+  const response = `- Consultar tu horario de trabajo.\n- Ver las citas que tienes que atender por día.\n- Pedir libre un intervalo de tiempo (para cuando no podrás atender las citas durante un intervalo de tiempo).\n- Puedes crear un nuevo servicio.\n- Puedes preguntar sobre tratamientos o pequeñas consultas dentales.\n- Preguntar por la dirección de la clínica dental.\n`
+
+  await sendText(socket, from!, response)
 }

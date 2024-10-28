@@ -4,8 +4,13 @@ import { ScheduleRepository } from '../../repositories/schedule'
 import { AppointmentRepository } from '../../repositories/appointment'
 import chalk from 'chalk'
 
+export interface DateFields {
+  day: string,
+  hour: string
+}
+
 export const appointmentIsPast = (
-  sock: WASocket, dataClient: SessionClientAppointment, from: string, session: Session
+  sock: WASocket, dataClient: DateFields, from: string, session: Session
 ) => {
   const date = new Date(`${dataClient.day}T05:00:00.000Z`)
   const day = new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(date)
@@ -28,7 +33,7 @@ export const appointmentIsPast = (
 }
 
 export const appointmentInWorkHours = async (
-  sock: WASocket, dataClient: SessionClientAppointment, from: string, session: Session
+  sock: WASocket, dataClient: DateFields, from: string, session: Session
 ) => {
   const date = new Date(`${dataClient.day}T05:00:00.000Z`)
   const day = new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(date)
@@ -49,7 +54,7 @@ export const appointmentInWorkHours = async (
 }
 
 export const appointmentHourIsAvailable = async (
-  sock: WASocket, dataClient: SessionClientAppointment, from: string, session: Session
+  sock: WASocket, dataClient: DateFields, from: string, session: Session
 ) => {
   const appointment = await AppointmentRepository.getByDayAndHour(dataClient.day, dataClient.hour)
   if (appointment.length > 0) {

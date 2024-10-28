@@ -11,8 +11,9 @@ import { cancelAppointment } from './cancelAppointment'
 import { informationClientBot } from './informationBot'
 import { adress } from './adress'
 import { modifyAppointment } from './modifyAppointment'
+import { optionalAppointment } from './opcionalCita'
 
-const userSession = new Map<string, Session>()
+export const userSession = new Map<string, Session>()
 
 export const mainFlowClient = async (socket: WASocket, messageInfo: proto.IWebMessageInfo) => {
   const from = messageInfo.key.remoteJid as string
@@ -78,6 +79,7 @@ export const mainFlowClient = async (socket: WASocket, messageInfo: proto.IWebMe
       consultAppointment(socket, messageInfo)
       break
     case 'opcional-cita':
+      optionalAppointment(socket, messageInfo, session)
       break
   }
 

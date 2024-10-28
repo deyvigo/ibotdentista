@@ -1,19 +1,21 @@
+import { askToAI } from '@/services/ai'
+import { Session } from '@interfaces/session.interface'
 import { WASocket } from '@whiskeysockets/baileys'
-import { Session } from '../../interfaces/session.interface'
-import { askToAI } from '../../services/ai'
-import { sendText } from '../../services/bot/sendText'
-import { formatDate } from '../formatDate'
 import { Validate } from './validator.interface'
+import { sendText } from '@/services/bot/sendText'
 
-export const clientAskAppValidator = async (
+
+/**
+* @description This function return false if the type of data is not valid
+*/
+export const optionalAppointmentValidator = async (
   socket: WASocket, message: string, from: string, session: Session, validateCondition: string
 ) => {
   const instructions = `
-  Estás creando una nueva cita para el cliente.
+  Estás solicitando datos al cliente para reprogramar una cita.
   Ahora le estás pidiendo ${validateCondition}.
   Si el mensaje del cliente está correcto según el tipo de dato que has pedido, responde con la acción aceptar.
   Caso contrario, responde con la acción salir.
-  No debes ser tan estricto con los datos que pidas, con que se entienda a qué se refiere está bien.
   Debes responder un JSON con la siguiente estructura:
   {
     "action": "aceptar" | "salir",
@@ -25,7 +27,6 @@ export const clientAskAppValidator = async (
   const resJson = JSON.parse(response) as Validate
 
   if (resJson.action.toLocaleLowerCase() === 'salir') {
-    console.log('Saliendo del flujo de cliente...')
     session.flow = ''
     session.step = 0
     session.payload = {}

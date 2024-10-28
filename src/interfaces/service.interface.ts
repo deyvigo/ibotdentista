@@ -8,6 +8,6 @@ export interface ServiceDTO extends RowDataPacket{
 
 export interface CreateServiceDTO {
   name: string,
-  cost: string,
+  description: string,
   id_doctor: string
 }
