@@ -31,6 +31,7 @@ export class AppointmentRepository {
     }
   }
 
+  // TODO: Revisar para poder mostrar todas las citas pendientes
   static getAppointmentByClientNumber = async (clientNumber: string) => {
     const query = `
     SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, n.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name
@@ -205,12 +206,12 @@ export class AppointmentRepository {
     }
   }
 
-  static getAppointmentByDNI = async (dni: string) => {
+  static getPendingAppointmentByDNI = async (dni: string) => {
     const query = `
     SELECT a.id_appointment, a.day, a.hour, a.state, a.reason, a.id_doctor, a.id_client, a.modified_by_admin_id
     FROM appointment a
     JOIN client c ON a.id_client = c.id_client
-    WHERE c.dni = ?;
+    WHERE c.dni = ? AND a.state = 'pending';
     `
 
     try {

@@ -81,9 +81,12 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
 
       if (match) {
         const dni = match[0]
-        const appointment = await AppointmentRepository.getAppointmentByDNI(dni)
+        const appointment = await AppointmentRepository.getPendingAppointmentByDNI(dni)
         if (appointment.length > 0) {
           await sendText(socket, from!, 'Ya existe una cita para ese DNI. Por favor, revisa tu agenda.')
+          session.step = 0
+          session.flow = ''
+          session.payload = {}
           return
         }
       }
@@ -92,7 +95,7 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
       session.payload = clientPayload
       session.step += 1
 
-      await sendText(socket, from!, '¿Cuál es tu nomber completo?')
+      await sendText(socket, from!, '¿Cuál es tu nombre completo?')
       break
     case 4:
       if (
@@ -138,12 +141,12 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
       const cNumber = await NumberRepository.getNumberByPhone(clientNumber)
       const idNumber = cNumber[0].id_number
 
-      const client = await ClientRepository.getClientByNumber(clientNumber)
+      const client = await ClientRepository.getClientByDNI(jsonData.dni)
       if (client.length === 0) {
         await ClientRepository.createClient({ id_number: idNumber, fullname: jsonData.fullname, dni: jsonData.dni })
       }
 
-      const clientOnDB = await ClientRepository.getClientByNumber(clientNumber)
+      const clientOnDB = await ClientRepository.getClientByDNI(jsonData.dni)
       const idClient = clientOnDB[0].id_client
       const doctor = await DoctorRepository.getDoctors()
       const idDoctor = doctor[0].id_doctor

@@ -7,7 +7,7 @@ export class ClientRepository {
     const sql = `
     SELECT c.id_client, c.full_name, c.dni, n.phone
     FROM client c
-    JOIN number n ON id_number = c.id_number
+    JOIN number n ON n.id_number = c.id_number
     WHERE n.phone = ?
     `
     try {
@@ -42,6 +42,22 @@ export class ClientRepository {
       return rows
     } catch (error) {
       console.log('Error getting client by id: ', error)
+      return []
+    }
+  }
+
+  static getClientByDNI = async (dni: string) => {
+    const sql = `
+    SELECT id_client, full_name, dni, n.phone
+    FROM client c
+    JOIN number n ON n.id_number = c.id_number
+    WHERE c.dni = ?;
+    `
+    try {
+      const [rows] = await dbConnection.query<ClientDTO[]>(sql, [dni])
+      return rows
+    } catch (error) {
+      console.log('Error getting client by dni: ', error)
       return []
     }
   }
