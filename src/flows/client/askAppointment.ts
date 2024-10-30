@@ -9,7 +9,7 @@ import { appointmentHourIsAvailable, appointmentInWorkHours, appointmentIsPast }
 import { ClientRepository } from '@repositories/client'
 import { DoctorRepository } from '@repositories/doctor'
 import { programNotify } from '@services/schedule/programNotify'
-import { programChangeStatusAppointment } from '@services/schedule/programChangeStatus'
+import { NumberRepository } from '@repositories/number'
 
 export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMessageInfo, session: Session) => {
   const from = messageInfo.key.remoteJid as string
@@ -17,16 +17,6 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
   const clientNumber = from.split('@')[0] as string
 
   const clientPayload = session.payload as SessionClientAppointment
-
-  // Only one appointment per phone number
-  const appointmentExists = await AppointmentRepository.getAppointmentByClientNumber(clientNumber)
-
-  if (appointmentExists.length > 0) {
-    await sendText(socket, from!, 'Ya existe una cita para este número de teléfono. Por favor, revisa tu agenda.')
-    session.flow = ''
-    session.step = 0
-    return
-  }
 
   switch (session.step) {
     case 0:
@@ -79,36 +69,48 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
       // comprobar que la hora de la cita no esté ocupada
       if (!await appointmentHourIsAvailable(socket, jData, from, session)) return
 
-      await sendText(socket, from!, '¿Cuál es el motivo de la cita?')
+      await sendText(socket, from!, '¿Cuál es tu número de DNI? (Ingresa solo los números)')
       break
     case 3:
       if (
-        !await clientAskAppValidator(socket, messageText, from, session, 'un motivo para la cita')
-      ) return
-
-      clientPayload.reason = messageText
-      session.payload = clientPayload
-      session.step += 1
-
-      await sendText(socket, from!, '¿Cuál es el número de DNI?')
-      break
-    case 4:
-      if (
         !await clientAskAppValidator(socket, messageText, from, session, 'el número de DNI (cadena de 8 dígitos)')
       ) return
+
+      // Check if dni have an appointment in status pending
+      const match = messageText.match(/\d+/)
+
+      if (match) {
+        const dni = match[0]
+        const appointment = await AppointmentRepository.getAppointmentByDNI(dni)
+        if (appointment.length > 0) {
+          await sendText(socket, from!, 'Ya existe una cita para ese DNI. Por favor, revisa tu agenda.')
+          return
+        }
+      }
 
       clientPayload.dni = messageText
       session.payload = clientPayload
       session.step += 1
 
-      await sendText(socket, from!, '¿Cuál es tu nombre completo?')
+      await sendText(socket, from!, '¿Cuál es tu nomber completo?')
       break
-    case 5:
+    case 4:
       if (
         !await clientAskAppValidator(socket, messageText, from, session, 'un nombre')
       ) return
 
       clientPayload.fullname = messageText
+      session.payload = clientPayload
+      session.step += 1
+
+      await sendText(socket, from!, '¿Cuál es el motivo para la cita?')
+      break
+    case 5:
+      if (
+        !await clientAskAppValidator(socket, messageText, from, session, 'un motivo para la cita')
+      ) return
+
+      clientPayload.reason = messageText
       session.payload = clientPayload
       
       await sendText(socket, from!, 'Gracias. Ahora crearé la cita.')
@@ -133,9 +135,12 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
 
       const jsonData = JSON.parse(data) as SessionClientAppointment
 
+      const cNumber = await NumberRepository.getNumberByPhone(clientNumber)
+      const idNumber = cNumber[0].id_number
+
       const client = await ClientRepository.getClientByNumber(clientNumber)
       if (client.length === 0) {
-        await ClientRepository.createClient({ phone: clientNumber, fullname: jsonData.fullname, dni: jsonData.dni })
+        await ClientRepository.createClient({ id_number: idNumber, fullname: jsonData.fullname, dni: jsonData.dni })
       }
 
       const clientOnDB = await ClientRepository.getClientByNumber(clientNumber)

@@ -1,7 +1,6 @@
 import { ResultSetHeader } from 'mysql2'
 import { dbConnection } from '@services/connection'
 import { AppointmentClientDTO, AppointmentDoctorDTO, AppointmentDTO, AppointmentIntervalDTO, CreateAppointmentDTO } from '@interfaces/appointment.interface'
-import { SessionDoctorSchedule } from '@interfaces/session.interface'
 import { DateState } from '@utils/date'
 
 export class AppointmentRepository {
@@ -34,11 +33,12 @@ export class AppointmentRepository {
 
   static getAppointmentByClientNumber = async (clientNumber: string) => {
     const query = `
-    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, c.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name
+    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, n.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name
     FROM appointment a
     JOIN client c ON a.id_client = c.id_client
     JOIN doctor d ON a.id_doctor = d.id_doctor
-    WHERE c.phone = ? AND a.state = 'pending'
+    JOIN number n ON n.id_number = c.id_number
+    WHERE n.phone = ? AND a.state = 'pending'
     LIMIT 1;
     `
     try {
@@ -52,10 +52,11 @@ export class AppointmentRepository {
 
   static getById = async (idAppointment: string) => {
     const query = `
-    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, c.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name
+    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, n.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name
     FROM appointment a
     JOIN client c ON a.id_client = c.id_client
     JOIN doctor d ON a.id_doctor = d.id_doctor
+    JOIN number n ON n.id_number = c.id_number
     WHERE a.id_appointment = ?;
     `
     try {
@@ -95,9 +96,10 @@ export class AppointmentRepository {
 
   static getAllByDay = async (day: string) => {
     const query = `
-    SELECT c.full_name, c.dni, a.hour, c.phone, a.state
+    SELECT c.full_name, c.dni, a.hour, n.phone, a.state
     FROM appointment a
     LEFT JOIN client c ON c.id_client = a.id_client
+    JOIN number n ON c.id_number = n.id_number
     WHERE a.day = ?;
     `
     try {
@@ -142,10 +144,11 @@ export class AppointmentRepository {
 
   static getPendingAppointments = async () => {
     const query = `
-    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, c.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name
+    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, n.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name
     FROM appointment a
     JOIN client c ON a.id_client = c.id_client
     JOIN doctor d ON a.id_doctor = d.id_doctor
+    JOIN number n ON c.id_number = c.id_number
     WHERE a.state = 'pending';
     `
     try {
@@ -171,10 +174,11 @@ export class AppointmentRepository {
 
   static getByDayAndHourInteval = async (day: string, start: string, end: string) => {
     const query = `
-    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, c.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name
+    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, n.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name
     FROM appointment a
     JOIN client c ON a.id_client = c.id_client
     JOIN doctor d ON a.id_doctor = d.id_doctor
+    JOIN number n ON n.id_number = c.id_number
     WHERE a.state = 'pending'
     AND a.day = ?
     AND a.hour >= ?
@@ -198,6 +202,23 @@ export class AppointmentRepository {
     } catch (error) {
       console.error('Error updating appointment: ', error)
       return 'No se pudo actualizar la cita'
+    }
+  }
+
+  static getAppointmentByDNI = async (dni: string) => {
+    const query = `
+    SELECT a.id_appointment, a.day, a.hour, a.state, a.reason, a.id_doctor, a.id_client, a.modified_by_admin_id
+    FROM appointment a
+    JOIN client c ON a.id_client = c.id_client
+    WHERE c.dni = ?;
+    `
+
+    try {
+      const [rows] = await dbConnection.query<AppointmentDTO[]>(query, [dni])
+      return rows
+    } catch (error) {
+      console.error('Error getting appointment by dni: ', error)
+      return []
     }
   }
 }

@@ -8,7 +8,7 @@ export interface ClientDTO extends RowDataPacket {
 }
 
 export interface CreateClientDTO {
-  phone: string,
+  id_number: string,
   fullname: string,
   dni: string
 }

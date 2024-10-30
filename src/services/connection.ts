@@ -12,14 +12,24 @@ export const dbConnection = createPool({
 })
 
 export const createDatabase = async () => {
+  const queryNumber = `
+  create table if not exists number
+  (
+    id_number uuid         not null
+      primary key,
+    phone     varchar(15)  not null
+  )
+  `
   const queryClient = `
     create table if not exists client
     (
       id_client uuid         not null
         primary key,
       full_name varchar(255) not null,
-      phone     varchar(15)  not null,
-      dni       varchar(10)  not null
+      dni       varchar(10)  not null,
+      id_number uuid         not null,
+      constraint client_number_id_number_fk
+        foreign key (id_number) references number (id_number)
     );
   `
   const queryDoctor = `
@@ -104,22 +114,11 @@ export const createDatabase = async () => {
         foreign key (id_doctor) references doctor (id_doctor)
     );
   `
-  const queryPayment = `
-    create table if not exists payment
-    (
-      id_payment       uuid          not null
-        primary key,
-      amount           decimal(10,2) not null,
-      description      varchar(255)  null,
-      id_appointment   uuid          not null unique,
-      constraint payment_appointment_id_appointment_fk
-        foreign key (id_appointment) references appointment (id_appointment)
-    );
-  `
 
   try {
     await dbConnection.query('begin')
 
+    await dbConnection.query(queryNumber)
     await dbConnection.query(queryClient)
     await dbConnection.query(queryDoctor)
     await dbConnection.query(queryAdmin)
@@ -127,7 +126,6 @@ export const createDatabase = async () => {
     await dbConnection.query(queryBlockTime)
     await dbConnection.query(querySchedule)
     await dbConnection.query(queryService)
-    await dbConnection.query(queryPayment)
 
     await dbConnection.query('commit')
     console.log('Base de datos creada exitosamente')
