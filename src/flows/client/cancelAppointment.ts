@@ -3,7 +3,6 @@ import { ClientRepository } from '@repositories/client'
 import { sendText } from '@services/bot/sendText'
 import { AppointmentRepository } from '@repositories/appointment'
 import { deleteNotify } from '@services/schedule/programNotify'
-import { deleteReminderChangeStatus } from '@services/schedule/programChangeStatus'
 
 export const cancelAppointment = async (socket: WASocket, messageInfo: proto.IWebMessageInfo) => {
   const from = messageInfo.key.remoteJid as string
@@ -22,10 +21,9 @@ export const cancelAppointment = async (socket: WASocket, messageInfo: proto.IWe
   // delete recordatory appointment recordatory and reminder change status
   for (const appointment of appointments) {
     deleteNotify(appointment)
-    deleteReminderChangeStatus(appointment)
   }
 
-  const result = await AppointmentRepository.deleteAppointmentByIdClient(client[0].id_client)
+  const result = await AppointmentRepository.deleteAppointmentByIdNumber(appointments[0].id_number)
 
   sendText(socket, from!, result)
 }

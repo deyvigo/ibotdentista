@@ -10,6 +10,8 @@ import { ClientRepository } from '@repositories/client'
 import { DoctorRepository } from '@repositories/doctor'
 import { programNotify } from '@services/schedule/programNotify'
 import { NumberRepository } from '@repositories/number'
+import { takeDayAndCreateImageDisponibility } from '@/utils/someFunctions.ts/takeDayAndCreateImage'
+import { sendImage } from '@/services/bot/sendImage'
 
 export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMessageInfo, session: Session) => {
   const from = messageInfo.key.remoteJid as string
@@ -25,10 +27,15 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
       session.step += 1
       break
     case 1:
-      // TODO: Aprovechando que se dio el día de la cita, traer una imagen con los horarios disponibles para ese día
       if (
         !await clientAskAppValidator(socket, messageText, from, session, 'un día para agendar la cita (puede ser hoy, mañana, o un día de la semana, incluyendo los sábados, excepto domingos)')
       ) return
+
+      // Send image with available hours for the day
+      const doc = await DoctorRepository.getDoctors()
+      const idDoc = doc[0].id_doctor
+      const imageBuffer = await takeDayAndCreateImageDisponibility(messageText, idDoc)
+      await sendImage(socket, from!, imageBuffer)
 
       clientPayload.day = messageText
       session.payload = clientPayload
