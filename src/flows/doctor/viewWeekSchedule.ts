@@ -28,8 +28,6 @@ export const viewWeekSchedule = async (socket: WASocket, messageInfo: proto.IWeb
   const daySchedule = await AppointmentRepository.getAllPerWeek(jsonResponse)
   const dataDays = dateToDay(daySchedule)
 
-  console.log('dataDays: ', dataDays)
-
   const imgBuffer = await createWeekScheduleImage(weekToString(jsonResponse), dataDays)
 
   await sendText(socket, from!, 'Este es el horario de la semana:')
