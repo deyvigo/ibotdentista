@@ -16,7 +16,6 @@ export const takeDayAndCreateImageDisponibility = async (day: string, idDoctor: 
 
   const data = await AppointmentRepository.getDisponibilityByDay(jsonData.date, idDoctor)
 
-  console.log('data: ', data)
   const imageBuffer = await createImageDisponibility(data, jsonData.date)
   return imageBuffer
 }

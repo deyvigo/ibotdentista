@@ -8,6 +8,7 @@ export const createImageDisponibility = async (data: AppointmentDisponibilityDTO
   const mapStates = {
     'pending': 'OCUPADO',
     'occupied': 'NO DISPONIBLE',
+    'attended': 'ATENDIDO'
   }
 
   const canvas = createCanvas(width, heigth)
@@ -31,7 +32,7 @@ export const createImageDisponibility = async (data: AppointmentDisponibilityDTO
 
   const hours = [
     '08:00:00', '09:00:00', '10:00:00', '11:00:00', '12:00:00',
-    '14:00:00', '15:00:00', '16:00:00', '17:00:00', '18:00:00'
+    '14:00:00', '15:00:00', '16:00:00', '17:00:00'
   ]
 
   const hoursWithStates = data.map(({ day, state, hour }) => hour)
@@ -50,16 +51,14 @@ export const createImageDisponibility = async (data: AppointmentDisponibilityDTO
           const stateWidth = ctx.measureText(state).width
           ctx.fillText(state, 623 - (stateWidth / 2) - 3, 281 + 109 * index + 37 + 8)
         }
+        return
       }
       ctx.fillStyle = '#00bf63'
-      const freeWidth = ctx.measureText('FREE').width
+      const freeWidth = ctx.measureText('LIBRE').width
       ctx.fillText('FREE', 623 - (freeWidth / 2) - 3, 281 + 109 * index + 37 + 8)
     }
-
-
   })
   
-
   const imgBuffer = canvas.toBuffer('image/png')
   return imgBuffer
 }
