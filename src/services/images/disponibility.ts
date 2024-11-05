@@ -2,7 +2,7 @@ import { AppointmentDisponibilityDTO } from '@/interfaces/appointment.interface'
 import { formatDate } from '@/utils/formatDate'
 import { createCanvas, loadImage } from 'canvas'
 
-export const createImageDisponibility = async (data: AppointmentDisponibilityDTO[], day: string) => {
+export const createImageDisponibility = async (data: AppointmentDisponibilityDTO[], dayString: string) => {
   const width = 952
   const heigth = 1400
   const mapStates = {
@@ -24,7 +24,8 @@ export const createImageDisponibility = async (data: AppointmentDisponibilityDTO
   // set date on top
   ctx.font = 'bold 28px "More Sugar"'
   ctx.fillStyle = '#000'
-  const date = formatDate(new Date(day))
+  const [year, month, day] = dayString.split('-').map(Number)
+  const date = formatDate(new Date(year, month - 1, day))
   const dateWidth = ctx.measureText(date).width
   ctx.fillText(date, 476 - (dateWidth / 2) - 3, 209 + 8)
 

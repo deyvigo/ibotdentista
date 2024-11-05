@@ -12,6 +12,7 @@ import { programNotify } from '@services/schedule/programNotify'
 import { NumberRepository } from '@repositories/number'
 import { takeDayAndCreateImageDisponibility } from '@/utils/someFunctions.ts/takeDayAndCreateImage'
 import { sendImage } from '@/services/bot/sendImage'
+import { isWorkingDay } from '@/utils/someFunctions.ts/isWorkingDay'
 
 export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMessageInfo, session: Session) => {
   const from = messageInfo.key.remoteJid as string
@@ -30,6 +31,9 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
       if (
         !await clientAskAppValidator(socket, messageText, from, session, 'un día para agendar la cita (puede ser hoy, mañana, o un día de la semana, incluyendo los sábados, excepto domingos)')
       ) return
+
+      // Check if day is on working days
+      if (!await isWorkingDay(socket, session, from, messageText)) return
 
       // Send image with available hours for the day
       const doc = await DoctorRepository.getDoctors()
