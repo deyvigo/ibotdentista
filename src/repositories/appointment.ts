@@ -96,16 +96,16 @@ export class AppointmentRepository {
     }
   }
 
-  static getAllByDay = async (day: string) => {
+  static getAllPerWeek = async ({ weekInit, weekEnd }: { weekInit: string, weekEnd: string }) => {
     const query = `
-    SELECT c.full_name, c.dni, a.hour, n.phone, a.state
+    SELECT c.full_name, c.dni, a.day, a.hour, n.phone, a.state
     FROM appointment a
     LEFT JOIN client c ON c.id_client = a.id_client
-    JOIN number n ON c.id_number = n.id_number
-    WHERE a.day = ?;
+    LEFT JOIN number n ON c.id_number = n.id_number
+    WHERE a.day BETWEEN ? AND ?;
     `
     try {
-      const [rows] = await dbConnection.query<AppointmentDoctorDTO[]>(query, [day])
+      const [rows] = await dbConnection.query<AppointmentDoctorDTO[]>(query, [weekInit, weekEnd])
       return rows
     } catch (error) {
       console.error('Error getting appointment by day: ', error)

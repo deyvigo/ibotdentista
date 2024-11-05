@@ -5,7 +5,7 @@ import { welcomeDoctor } from './welcome'
 import { consultation } from './consultations'
 import { scheduleDoctor } from './schedule'
 import { addService } from './addService'
-import { viewDaySchedule } from './viewDaySchedule'
+import { viewWeekSchedule } from './viewWeekSchedule'
 import { cancelAppointments } from './cancelAppointments'
 import { informationDoctorBot } from './informationBot'
 
@@ -20,7 +20,7 @@ export const mainFlowDoctor = async (socket: WASocket, messageInfo: proto.IWebMe
   - informacion-bot: para preguntar sobre que hace el bot
   - bienvenida: para saludar al usuario o recibir agradecimientos
   - horario: para solicitar el horario de trabajo del doctor
-  - ver-citas: para ver las citas que tiene que atender el dentista
+  - ver-citas: para ver las citas que tiene que atender el dentista por semana
   - cancelar: para cancelar citas o tomarse tiempo del día libre
   - crear-servicio: para agregar un nuevo servicio
   - consultas: para realizar consultas sobre odontología
@@ -50,7 +50,7 @@ export const mainFlowDoctor = async (socket: WASocket, messageInfo: proto.IWebMe
       scheduleDoctor(socket, messageInfo)
       break
     case 'ver-citas':
-      viewDaySchedule(socket, messageInfo)
+      viewWeekSchedule(socket, messageInfo)
       break
     case 'cancelar':
       cancelAppointments(socket, messageInfo, session)

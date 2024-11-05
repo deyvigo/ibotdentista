@@ -39,8 +39,9 @@ export interface AppointmentClientDTO extends RowDataPacket {
 export interface AppointmentDoctorDTO extends RowDataPacket {
   full_name: string,
   dni: string,
-  hour: string
-  phone: string
+  hour: string,
+  day: string,
+  phone: string,
   state: DateState
 }
 
