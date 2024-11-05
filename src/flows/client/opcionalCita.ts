@@ -6,6 +6,9 @@ import { appointmentHourIsAvailable, appointmentInWorkHours, appointmentIsPast }
 import { askToAI } from '@/services/ai'
 import { AppointmentRepository } from '@/repositories/appointment'
 import { programNotify } from '@/services/schedule/programNotify'
+import { DoctorRepository } from '@/repositories/doctor'
+import { takeDayAndCreateImageDisponibility } from '@/utils/someFunctions.ts/takeDayAndCreateImage'
+import { sendImage } from '@/services/bot/sendImage'
 
 export const optionalAppointment = async (socket: WASocket, messageInfo: proto.IWebMessageInfo, session: Session) => {
   const from = messageInfo.key.remoteJid as string
@@ -33,6 +36,12 @@ export const optionalAppointment = async (socket: WASocket, messageInfo: proto.I
           'un día para agendar la cita (puede ser hoy, mañana, o un día de la semana, incluyendo los sábados, excepto domingos)'
         )
       ) return
+
+      // Send image with available hours for the day
+      const doc = await DoctorRepository.getDoctors()
+      const idDoc = doc[0].id_doctor
+      const imageBuffer = await takeDayAndCreateImageDisponibility(messageText, idDoc)
+      await sendImage(socket, from!, imageBuffer)
 
       session.step += 1
       clientPayload.day = messageText
