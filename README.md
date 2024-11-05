@@ -20,3 +20,4 @@ npm install
 ```
 npm run dev
 ```
+6. Scan the QR code with your phone

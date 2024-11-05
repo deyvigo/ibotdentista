@@ -1,7 +1,6 @@
 import { ResultSetHeader } from 'mysql2'
 import { dbConnection } from '@services/connection'
-import { AppointmentClientDTO, AppointmentDoctorDTO, AppointmentDTO, AppointmentIntervalDTO, CreateAppointmentDTO } from '@interfaces/appointment.interface'
-import { SessionDoctorSchedule } from '@interfaces/session.interface'
+import { AppointmentClientDTO, AppointmentDisponibilityDTO, AppointmentDoctorDTO, AppointmentDTO, AppointmentIntervalDTO, CreateAppointmentDTO } from '@interfaces/appointment.interface'
 import { DateState } from '@utils/date'
 
 export class AppointmentRepository {
@@ -32,14 +31,15 @@ export class AppointmentRepository {
     }
   }
 
+  // TODO: Revisar para poder mostrar todas las citas pendientes
   static getAppointmentByClientNumber = async (clientNumber: string) => {
     const query = `
-    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, c.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name
+    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, n.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name, c.id_number
     FROM appointment a
     JOIN client c ON a.id_client = c.id_client
     JOIN doctor d ON a.id_doctor = d.id_doctor
-    WHERE c.phone = ? AND a.state = 'pending'
-    LIMIT 1;
+    JOIN number n ON n.id_number = c.id_number
+    WHERE n.phone = ? AND a.state = 'pending'
     `
     try {
       const [rows] = await dbConnection.query<AppointmentClientDTO[]>(query, [clientNumber])
@@ -50,12 +50,31 @@ export class AppointmentRepository {
     }
   }
 
-  static getById = async (idAppointment: string) => {
+  static getPendingAppointmentsByDni = async (dni: string) => {
     const query = `
-    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, c.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name
+    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, n.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name, c.id_number
     FROM appointment a
     JOIN client c ON a.id_client = c.id_client
     JOIN doctor d ON a.id_doctor = d.id_doctor
+    JOIN number n ON n.id_number = c.id_number
+    WHERE c.dni = ? AND a.state = 'pending'
+    `
+    try {
+      const [rows] = await dbConnection.query<AppointmentClientDTO[]>(query, [dni])
+      return rows
+    } catch (error) {
+      console.error('Error getting appointment by client number: ', error)
+      return []
+    }
+  }
+
+  static getById = async (idAppointment: string) => {
+    const query = `
+    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, n.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name
+    FROM appointment a
+    JOIN client c ON a.id_client = c.id_client
+    JOIN doctor d ON a.id_doctor = d.id_doctor
+    JOIN number n ON n.id_number = c.id_number
     WHERE a.id_appointment = ?;
     `
     try {
@@ -78,14 +97,16 @@ export class AppointmentRepository {
     }
   }
 
-  static deleteAppointmentByIdClient = async (idClient: string) => {
+  static deletePendingsAppointmentByDni = async (dni: string) => {
     const query = `
-    DELETE FROM appointment
-    WHERE id_client = ? AND state = 'pending';
+    DELETE a
+    FROM appointment a
+    JOIN client c ON a.id_client = c.id_client
+    WHERE c.dni = ? AND state = 'pending';
     `
     try {
-      const [result] = await dbConnection.query<ResultSetHeader>(query, [idClient])
-      if (result.affectedRows === 0) return 'No se pudo eliminar su cita'
+      const [result] = await dbConnection.query<ResultSetHeader>(query, [dni])
+      if (result.affectedRows === 0) return 'No tiene citas pendientes para eliminar'
       return 'Su cita ha sido eliminada'
     } catch (error) {
       console.error('Error deleting appointment by id client: ', error)
@@ -93,15 +114,16 @@ export class AppointmentRepository {
     }
   }
 
-  static getAllByDay = async (day: string) => {
+  static getAllPerWeek = async ({ weekInit, weekEnd }: { weekInit: string, weekEnd: string }) => {
     const query = `
-    SELECT c.full_name, c.dni, a.hour, c.phone, a.state
+    SELECT c.full_name, c.dni, a.day, a.hour, n.phone, a.state
     FROM appointment a
     LEFT JOIN client c ON c.id_client = a.id_client
-    WHERE a.day = ?;
+    LEFT JOIN number n ON c.id_number = n.id_number
+    WHERE a.day BETWEEN ? AND ?;
     `
     try {
-      const [rows] = await dbConnection.query<AppointmentDoctorDTO[]>(query, [day])
+      const [rows] = await dbConnection.query<AppointmentDoctorDTO[]>(query, [weekInit, weekEnd])
       return rows
     } catch (error) {
       console.error('Error getting appointment by day: ', error)
@@ -142,10 +164,11 @@ export class AppointmentRepository {
 
   static getPendingAppointments = async () => {
     const query = `
-    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, c.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name
+    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, n.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name
     FROM appointment a
     JOIN client c ON a.id_client = c.id_client
     JOIN doctor d ON a.id_doctor = d.id_doctor
+    JOIN number n ON c.id_number = c.id_number
     WHERE a.state = 'pending';
     `
     try {
@@ -171,10 +194,11 @@ export class AppointmentRepository {
 
   static getByDayAndHourInteval = async (day: string, start: string, end: string) => {
     const query = `
-    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, c.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name
+    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, n.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name
     FROM appointment a
     JOIN client c ON a.id_client = c.id_client
     JOIN doctor d ON a.id_doctor = d.id_doctor
+    JOIN number n ON n.id_number = c.id_number
     WHERE a.state = 'pending'
     AND a.day = ?
     AND a.hour >= ?
@@ -198,6 +222,40 @@ export class AppointmentRepository {
     } catch (error) {
       console.error('Error updating appointment: ', error)
       return 'No se pudo actualizar la cita'
+    }
+  }
+
+  static getPendingAppointmentByDNI = async (dni: string) => {
+    const query = `
+    SELECT a.id_appointment, a.day, a.hour, a.state, a.reason, a.id_doctor, a.id_client, a.modified_by_admin_id
+    FROM appointment a
+    JOIN client c ON a.id_client = c.id_client
+    WHERE c.dni = ? AND a.state = 'pending';
+    `
+
+    try {
+      const [rows] = await dbConnection.query<AppointmentDTO[]>(query, [dni])
+      return rows
+    } catch (error) {
+      console.error('Error getting appointment by dni: ', error)
+      return []
+    }
+  }
+
+  static getDisponibilityByDay = async (day: string, idDoctor: string) => {
+    const query = `
+    SELECT a.day, a.state, a.hour
+    FROM appointment a 
+    LEFT JOIN client c ON a.id_client = c.id_client
+    WHERE a.day = ? AND a.id_doctor = ?
+    `
+
+    try {
+      const [rows] = await dbConnection.query<AppointmentDisponibilityDTO[]>(query, [day, idDoctor])
+      return rows
+    } catch (error) {
+      console.error('Error getting appointment by day: ', error)
+      return []
     }
   }
 }

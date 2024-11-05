@@ -9,5 +9,5 @@ export const formatDate = (date: Date) => {
   const minutes = date.getMinutes().toString().padStart(2, '0')
   const seconds = date.getSeconds().toString().padStart(2, '0')
 
-  return `${dayString}, ${day} de ${month} de ${year} ${hours}:${minutes}:${seconds}`
+  return `${dayString}, ${day} de ${month} de ${year}`
 }

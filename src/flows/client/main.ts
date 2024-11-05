@@ -12,6 +12,8 @@ import { informationClientBot } from './informationBot'
 import { adress } from './adress'
 import { modifyAppointment } from './modifyAppointment'
 import { optionalAppointment } from './opcionalCita'
+import { NumberRepository } from '@/repositories/number'
+import { sendText } from '@/services/bot/sendText'
 
 export const userSession = new Map<string, Session>()
 
@@ -37,11 +39,24 @@ export const mainFlowClient = async (socket: WASocket, messageInfo: proto.IWebMe
   Respuesta ideal: (informacion-bot|bienvenida|servicios|horario-doctor|reprogramar-cita|consultas|solicitar-cita|cancelar-cita|citas-creadas). Solo la acción sin parentesis ni espacios.
   `
 
+  // Send a informative message if client send a first message to bot
+  const clientNumber = from.split('@')[0]
+  if (clientNumber.match(/\d+/)) {
+    const isExistingNumber = await NumberRepository.getNumberByPhone(clientNumber)
+    if (isExistingNumber.length === 0) {
+      const welcomeMessage = `- Consultar el horario de trabajo del doctor.\n- Ver las citas que tienes pendientes.\n- Agendar una nueva cita (solo una por número de DNI).\n- Cancelar citas.\n- Consultar los servicios que ofrece el consultorio dental.\n- Preguntar sobre tratamientos o pequeñas consultas dentales.\n- Preguntar por la ubicación de la clínica dental.`
+      await sendText(socket, from, 'Bienvenido, soy el asistente de atención al cliente de la clínica Tapia y Asociados. Entre las acciones con las puedo ayudarte están:')
+      await sendText(socket, from, welcomeMessage)
+      await NumberRepository.insertOne(clientNumber)
+      return
+    }
+  }
+
   // obtain user session
   let session = userSession.get(from) || { step: 0, flow: '', payload: {} }
 
   // Si el mensaje es solicitar-cita, no preguntar a la ia porque el flujo se rompe desde dentro
-  if (session.flow !== 'solicitar-cita' && session.flow !== 'reprogramar-cita' && session.flow !== 'opcional-cita') {
+  if (session.flow !== 'solicitar-cita' && session.flow !== 'reprogramar-cita' && session.flow !== 'opcional-cita' && session.flow !== 'cancelar-cita') {
     session.flow = (await askToAI(messageText, 'text', instructions) as string).trim() as ClientFlow
   }
 
@@ -73,7 +88,7 @@ export const mainFlowClient = async (socket: WASocket, messageInfo: proto.IWebMe
       askAppointment(socket, messageInfo, session)
       break
     case 'cancelar-cita':
-      cancelAppointment(socket, messageInfo)
+      cancelAppointment(socket, messageInfo, session)
       break
     case 'citas-creadas':
       consultAppointment(socket, messageInfo)

@@ -113,8 +113,7 @@ export const cancelAppointments = async (
         // delete notifications
         deleteNotify(appointment)
 
-        // TODO: create a session client to new flow to update the appointment
-
+        // create a session client to new flow to update the appointment
         const appointmentOptional: SessionClientAppointmentOptional = {
           id_appointment: appointment.id_appointment,
           day: '',

@@ -1,7 +1,7 @@
 export interface Session {
   step: number,
   flow: ClientFlow | DoctorFlow | '',
-  payload: SessionDoctorSchedule | SessionClientAppointment | SessionDoctorService | {}
+  payload: SessionDoctorSchedule | SessionClientAppointment | SessionDoctorService | SessionClientAppointmentOptional | SessionClientAppointmentModification | {}
 }
 
 // Interface para que el doctor pueda cancelar citas de su horario
@@ -29,6 +29,13 @@ export interface SessionDoctorService {
 // Interface opcional para cuando el doctor le cancela la cita a un cliente y se le pide si quiere programar otra cita
 export interface SessionClientAppointmentOptional {
   id_appointment: string,
+  day: string,
+  hour: string,
+}
+
+// Interface to user can modify appointment
+export interface SessionClientAppointmentModification {
+  dni: string,
   day: string,
   hour: string,
 }
