@@ -21,3 +21,7 @@ npm install
 npm run dev
 ```
 6. Scan the QR code with your phone
+7. Insert into doctor table your data
+```sql
+INSERT INTO doctor (id_doctor, phone, first_name, last_name) VALUES (uuid(), '51{number} example 51999444222', 'name', 'lastname');
+```
