@@ -54,8 +54,8 @@ export const createImageDisponibility = async (data: AppointmentDisponibilityDTO
         return
       }
       ctx.fillStyle = '#00bf63'
-      const freeWidth = ctx.measureText('LIBRE').width
-      ctx.fillText('FREE', 623 - (freeWidth / 2) - 3, 281 + 109 * index + 37 + 8)
+      const freeWidth = ctx.measureText('DISPONIBLE').width
+      ctx.fillText('DISPONIBLE', 623 - (freeWidth / 2) - 3, 281 + 109 * index + 37 + 8)
     }
   })
   

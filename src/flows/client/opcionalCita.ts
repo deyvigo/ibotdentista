@@ -5,7 +5,7 @@ import { optionalAppointmentValidator } from '@/utils/validators/optionalAppoint
 import { appointmentHourIsAvailable, appointmentInWorkHours, appointmentIsPast } from '@/utils/validators/appointment'
 import { askToAI } from '@/services/ai'
 import { AppointmentRepository } from '@/repositories/appointment'
-import { programNotify } from '@/services/schedule/programNotify'
+import { deleteNotify, programNotify } from '@/services/schedule/programNotify'
 import { DoctorRepository } from '@/repositories/doctor'
 import { takeDayAndCreateImageDisponibility } from '@/utils/someFunctions.ts/takeDayAndCreateImage'
 import { sendImage } from '@/services/bot/sendImage'
@@ -81,11 +81,23 @@ export const optionalAppointment = async (socket: WASocket, messageInfo: proto.I
       if (!await appointmentInWorkHours(socket, { day: resJson.day, hour: resJson.hour }, from, session)) return
       if (!await appointmentHourIsAvailable(socket, { day: resJson.day, hour: resJson.hour }, from, session)) return
 
-      const result = await AppointmentRepository.updateAppointmentById(resJson.id_appointment, resJson.day, resJson.hour)
+      const previousAppointment = await AppointmentRepository.getAppointmentDTOById(resJson.id_appointment)
+      if (previousAppointment.length <= 0) {
+        await sendText(socket, from!, 'No tienes citas pendientes para cambiar la fecha y hora')
+        session.flow = ''
+        session.step = 0
+        session.payload = {}
+        return
+      }
+      const result = await AppointmentRepository.insertCanceledAppointmentOnAnotherDate(previousAppointment[0], resJson.day, resJson.hour)
 
       if (result === 'Su cita ha sido actualizada') {
         const appointment = await AppointmentRepository.getById(resJson.id_appointment)
-        programNotify(socket, appointment[0], -30)
+        deleteNotify(appointment[0])
+        // program new notify
+        const newAppointment = await AppointmentRepository.getAppointmentByClientNumber(from.split('@')[0])
+        await sendText(socket, newAppointment[0].doctor_number, 'Un cliente ha reprogramado su cita, revisa tu agenda.')
+        programNotify(socket, newAppointment[0], -30)
       }
 
       await sendText(socket, from, result)

@@ -10,7 +10,7 @@ export const createScheduleImage = async (data: { day: string, hour: string }[])
   const daysWidth = {
     'lunes': 564,
     'martes': 993,
-    'miércoles': 1421,
+    'miercoles': 1421,
     'jueves': 1854,
     'viernes': 2285,
     'sábado': 2717

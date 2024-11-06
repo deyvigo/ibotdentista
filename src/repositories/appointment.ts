@@ -34,7 +34,7 @@ export class AppointmentRepository {
   // TODO: Revisar para poder mostrar todas las citas pendientes
   static getAppointmentByClientNumber = async (clientNumber: string) => {
     const query = `
-    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, n.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name, c.id_number
+    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, n.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name, c.id_number, d.doctor_number
     FROM appointment a
     JOIN client c ON a.id_client = c.id_client
     JOIN doctor d ON a.id_doctor = d.id_doctor
@@ -214,9 +214,29 @@ export class AppointmentRepository {
   }
 
   static updateAppointmentById = async (idAppointment: string, day: string, hour: string) => {
-    const query = `UPDATE appointment SET day = ?, hour = ?, state = 'pending' WHERE id_appointment = ?;`
+    const query = `
+    UPDATE appointment
+    SET day = ?, hour = ?
+    WHERE id_appointment = ?;
+    `
     try {
       const [resul] = await dbConnection.query<ResultSetHeader>(query, [day, hour, idAppointment])
+      if (resul.affectedRows === 0) return 'No se pudo actualizar la cita'
+      return 'Su cita ha sido actualizada'
+    } catch (error) {
+      console.error('Error updating appointment: ', error)
+      return 'No se pudo actualizar la cita'
+    }
+  }
+
+  static insertCanceledAppointmentOnAnotherDate = async (appointment: AppointmentDTO, day: string, hour: string) => {
+    const query = `
+    INSERT INTO appointment (id_appointment, day, hour, state, reason, id_doctor, id_client, modified_by_admin_id)
+    VALUES
+    (uuid(), ?, ?, 'pending', ?, ?, ?, null);
+    `
+    try {
+      const [resul] = await dbConnection.query<ResultSetHeader>(query, [day, hour, appointment.reason, appointment.id_doctor, appointment.id_client, appointment.modified_by_admin_id])
       if (resul.affectedRows === 0) return 'No se pudo actualizar la cita'
       return 'Su cita ha sido actualizada'
     } catch (error) {
@@ -255,6 +275,22 @@ export class AppointmentRepository {
       return rows
     } catch (error) {
       console.error('Error getting appointment by day: ', error)
+      return []
+    }
+  }
+
+  static getAppointmentDTOById = async (idAppointment: string) => {
+    const query = `
+    SELECT *
+    FROM appointment
+    WHERE id_appointment = ?;
+    `
+
+    try {
+      const [rows] = await dbConnection.query<AppointmentDTO[]>(query, [idAppointment])
+      return rows
+    } catch (error) {
+      console.error('Error getting appointment by id: ', error)
       return []
     }
   }
