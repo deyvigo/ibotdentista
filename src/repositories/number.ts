@@ -25,4 +25,15 @@ export class NumberRepository {
       return []
     }
   }
+
+  static getAllNumbers = async () => {
+    const query = 'SELECT * FROM number;'
+    try {
+      const [rows] = await dbConnection.query<NumberDTO[]>(query)
+      return rows
+    } catch (error) {
+      console.error('Error getting all numbers: ', error)
+      return []
+    }
+  }
 }

@@ -8,6 +8,7 @@ import { addService } from './addService'
 import { viewWeekSchedule } from './viewWeekSchedule'
 import { cancelAppointments } from './cancelAppointments'
 import { informationDoctorBot } from './informationBot'
+import { sendDiffusionMessage } from './sendDiffusionMessage'
 
 const userSessions = new Map<string, Session>()
 
@@ -24,6 +25,7 @@ export const mainFlowDoctor = async (socket: WASocket, messageInfo: proto.IWebMe
   - cancelar: para cancelar citas o tomarse tiempo del día libre
   - crear-servicio: para agregar un nuevo servicio
   - consultas: para realizar consultas sobre odontología
+  - difusion: para enviar un mensaje, alerta, promoción, etc a todos los usuarios
   Si el mensaje del dentista es un saludo, responde con la accion bienvenida.
   Si el mensaje del dentista no tiene relación con el servicio dental, responde con la accion bienvenida.
   La accion bienvenida es la de menor prioridad.
@@ -33,7 +35,7 @@ export const mainFlowDoctor = async (socket: WASocket, messageInfo: proto.IWebMe
   // obtain user session
   let session = userSessions.get(from) || { step: 0, flow: '', payload: {} }
 
-  if (session.flow !== 'cancelar' && session.flow !== 'crear-servicio') {
+  if (session.flow !== 'cancelar' && session.flow !== 'crear-servicio' && session.flow !== 'difusion') {
     session.flow = (await askToAI(messageText, 'text', instructions) as string).trim() as DoctorFlow
   }
 
@@ -61,6 +63,8 @@ export const mainFlowDoctor = async (socket: WASocket, messageInfo: proto.IWebMe
     case 'consultas':
       consultation(socket, messageInfo)
       break
+    case 'difusion':
+      sendDiffusionMessage(socket, messageInfo, session)
   }
 
   // save updated session
