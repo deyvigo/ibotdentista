@@ -11,6 +11,12 @@ export const createImageDisponibility = async (data: AppointmentDisponibilityDTO
     'attended': 'ATENDIDO'
   }
 
+  const mapStateColors = {
+    'pending': '#db383f',
+    'occupied': '#db383f',
+    'attended': '#e5b95c'
+  }
+
   const canvas = createCanvas(width, heigth)
   const ctx = canvas.getContext('2d')
 
@@ -28,34 +34,30 @@ export const createImageDisponibility = async (data: AppointmentDisponibilityDTO
   const [year, month, day] = dayString.split('-').map(Number)
   const date = formatDate(new Date(year, month - 1, day))
   const dateWidth = ctx.measureText(date).width
-  ctx.fillText(date, 476 - (dateWidth / 2) - 3, 209 + 8)
+  ctx.fillText(date, 476 - (dateWidth / 2) - 3, 253 + 8)
 
   const hours = [
     '08:00:00', '09:00:00', '10:00:00', '11:00:00', '12:00:00',
     '14:00:00', '15:00:00', '16:00:00', '17:00:00'
   ]
 
-  const hoursWithStates = data.map(({ day, state, hour }) => hour)
+  const dataHours = data.map(({ day, state, hour }) => hour)
   
   hours.forEach((hour, index) => {
-    if (hour === '12:00:00') {
-      ctx.fillStyle = '#00bf63'
-      const textWidth = ctx.measureText('HORA DE ALMUERZO').width
-      ctx.fillText('HORA DE ALMUERZO', 623 - (textWidth / 2) - 3, 281 + 109 * index + 37 + 8)
-    } else {
-      if (hoursWithStates.includes(hour)) {
-        const stateKey = data.find(({ hour: h }) => h === hour)!.state as keyof typeof mapStates
-        if (stateKey) {
-          const state = mapStates[stateKey]
-          ctx.fillStyle = state === 'OCUPADO' ? '#e5b95c' : '#db383f'
-          const stateWidth = ctx.measureText(state).width
-          ctx.fillText(state, 623 - (stateWidth / 2) - 3, 281 + 109 * index + 37 + 8)
-        }
-        return
+    if (hour !== '12:00:00') {
+      if (dataHours.includes(hour)) {
+        const stateKey = data.find(({ day, hour }) => hour === hour)?.state
+        console.log(stateKey)
+        ctx.fillStyle = mapStateColors[stateKey as keyof typeof mapStateColors]
+        const text = mapStates[stateKey as keyof typeof mapStates]
+        const textWidth = ctx.measureText(text).width
+        ctx.fillText(text, 623 - (textWidth / 2) - 3, 361 + 8 + (index * 109))
+      } else {
+        ctx.fillStyle = '#00bf63'
+        const text = 'LIBRE'
+        const textWidth = ctx.measureText(text).width
+        ctx.fillText(text, 623 - (textWidth / 2) - 3, 361 + 8 + (index * 109))
       }
-      ctx.fillStyle = '#00bf63'
-      const freeWidth = ctx.measureText('DISPONIBLE').width
-      ctx.fillText('DISPONIBLE', 623 - (freeWidth / 2) - 3, 281 + 109 * index + 37 + 8)
     }
   })
   

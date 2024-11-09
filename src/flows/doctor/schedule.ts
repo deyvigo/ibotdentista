@@ -15,7 +15,6 @@ export const scheduleDoctor = async (socket: WASocket, messageInfo: proto.IWebMe
   }
 
   const scheduleFlat = scheduleToFlat(schedule)
-  console.log('scheduleFlat: ', scheduleFlat)
 
   await sendText(socket, from!, 'Este es tu horario de trabajo:')
   

@@ -34,7 +34,7 @@ export class AppointmentRepository {
   // TODO: Revisar para poder mostrar todas las citas pendientes
   static getAppointmentByClientNumber = async (clientNumber: string) => {
     const query = `
-    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, n.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name, c.id_number, d.doctor_number
+    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, n.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name, c.id_number, d.phone as doctor_number
     FROM appointment a
     JOIN client c ON a.id_client = c.id_client
     JOIN doctor d ON a.id_doctor = d.id_doctor
@@ -52,7 +52,7 @@ export class AppointmentRepository {
 
   static getPendingAppointmentsByDni = async (dni: string) => {
     const query = `
-    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, n.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name, c.id_number
+    SELECT a.id_appointment, a.day, a.hour, a.reason, a.state, a.modified_by_admin_id, n.phone, c.dni, c.full_name as fullname, CONCAT(d.last_name, ', ', d.first_name) AS doctor_name, c.id_number, d.phone as doctor_number
     FROM appointment a
     JOIN client c ON a.id_client = c.id_client
     JOIN doctor d ON a.id_doctor = d.id_doctor

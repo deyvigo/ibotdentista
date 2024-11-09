@@ -16,7 +16,6 @@ export const consultAppointment = async (socket: WASocket, messageInfo: proto.IW
     return
   }
 
-  console.log('listAppointments: ', listAppointments)
   const imgBuffer = await createImageAppointmentsClient(listAppointments)
 
   await sendText(socket, from!, 'Claro. Aquí tienes tus citas pendientes.')

@@ -10,7 +10,6 @@ import { AppointmentIntervalDTO } from '@/interfaces/appointment.interface'
 import { generateIntervals } from '@/utils/generateIntervals'
 import { BlockTimeRepository } from '@/repositories/blockTime'
 import { userSession } from '../client/main'
-import { formatDate } from '@utils/formatDate'
 
 export const cancelAppointments = async (
   socket: WASocket, messageInfo: proto.IWebMessageInfo, session: Session

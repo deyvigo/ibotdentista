@@ -44,6 +44,10 @@ export const cancelAppointment = async (socket: WASocket, messageInfo: proto.IWe
           deleteNotify(appointment)
         }
 
+        // send message to doctor
+        const doctorJId = `${appointments[0].doctor_number}@s.whatsapp.net`
+        await sendText(socket, doctorJId, `Doctor, el cliente ${appointments[0].fullname} ha cancelado su cita. Por favor, revisa tu agenda.`)
+        
         const result = await AppointmentRepository.deletePendingsAppointmentByDni(dni)
         await sendText(socket, from!, result)
       }

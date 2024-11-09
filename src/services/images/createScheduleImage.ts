@@ -8,25 +8,24 @@ export const createScheduleImage = async (data: { day: string, hour: string }[])
   ctx.drawImage(imgBackground, 0, 0, canvas.width, canvas.height)
 
   const daysWidth = {
-    'lunes': 564,
-    'martes': 993,
-    'miercoles': 1421,
-    'jueves': 1854,
-    'viernes': 2285,
-    'sábado': 2717
+    'lunes': 557,
+    'martes': 986,
+    'miercoles': 1417,
+    'jueves': 1847,
+    'viernes': 2279,
+    'sábado': 2712
   }
 
   const daysHeight = {
-    '08:00:00': 339,
-    '09:00:00': 443,
-    '10:00:00': 547,
-    '11:00:00': 650,
-    '12:00:00': 754,
-    '14:00:00': 858,
-    '15:00:00': 962,
-    '16:00:00': 1065,
-    '17:00:00': 1169,
-    '18:00:00': 1272
+    '08:00:00': 409,
+    '09:00:00': 513,
+    '10:00:00': 617,
+    '11:00:00': 721,
+    '12:00:00': 824,
+    '14:00:00': 928,
+    '15:00:00': 1032,
+    '16:00:00': 1136,
+    '17:00:00': 1239
   }
 
   data.forEach(({ day, hour }) => {
@@ -39,5 +38,4 @@ export const createScheduleImage = async (data: { day: string, hour: string }[])
   // Guardar la imagen
   const buffer = canvas.toBuffer('image/png')
   return buffer
-  // fs.writeFileSync('mainhorario.png', buffer)
 }

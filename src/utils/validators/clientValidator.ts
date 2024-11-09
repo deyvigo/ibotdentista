@@ -2,7 +2,6 @@ import { WASocket } from '@whiskeysockets/baileys'
 import { Session } from '../../interfaces/session.interface'
 import { askToAI } from '../../services/ai'
 import { sendText } from '../../services/bot/sendText'
-import { formatDate } from '../formatDate'
 import { Validate } from './validator.interface'
 
 export const clientAskAppValidator = async (
