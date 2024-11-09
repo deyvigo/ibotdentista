@@ -170,7 +170,8 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
         // send notification to doctor
         const doctorNumber = doctor[0].phone
         const doctorJid = `${doctorNumber}@s.whatsapp.net`
-        await sendText(socket, doctorJid, `Doctor, un cliente ha agendado una cita para el día ${jsonData.day}  a las ${jsonData.hour}.`)
+        console.log(jsonData.day)
+        await sendText(socket, doctorJid, `Doctor, un cliente ha agendado una cita para el día ${formatDate(new Date(`${jsonData.day}T05:00:00.000Z`))}  a las ${jsonData.hour}.`)
 
         // establish reminder to send notification to client on the last insert appointment
         const appointment = await AppointmentRepository.getAppointmentByClientNumber(clientNumber)
