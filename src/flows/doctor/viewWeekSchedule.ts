@@ -30,6 +30,6 @@ export const viewWeekSchedule = async (socket: WASocket, messageInfo: proto.IWeb
 
   const imgBuffer = await createWeekScheduleImage(weekToString(jsonResponse), dataDays)
 
-  await sendText(socket, from!, 'Este es el horario de la semana:')
+  await sendText(socket, from!, 'Este son las citas que tienes que atender durante la semana:')
   await sendImage(socket, from!, imgBuffer)
 }
