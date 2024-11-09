@@ -1,5 +1,5 @@
 import { WASocket } from '@whiskeysockets/baileys'
-import { Session, SessionClientAppointment } from '../../interfaces/session.interface'
+import { Session } from '../../interfaces/session.interface'
 import { ScheduleRepository } from '../../repositories/schedule'
 import { AppointmentRepository } from '../../repositories/appointment'
 import chalk from 'chalk'
