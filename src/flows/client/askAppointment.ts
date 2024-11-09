@@ -172,10 +172,10 @@ export const askAppointment = async (socket: WASocket, messageInfo: proto.IWebMe
         const doctorJid = `${doctorNumber}@s.whatsapp.net`
         await sendText(socket, doctorJid, `Doctor, un cliente ha agendado una cita para el día ${jsonData.day}  a las ${jsonData.hour}.`)
 
-        // establish reminder to change status to attended and send notification to client
+        // establish reminder to send notification to client on the last insert appointment
         const appointment = await AppointmentRepository.getAppointmentByClientNumber(clientNumber)
         if (appointment.length > 0) {
-          programNotify(socket, appointment[0], -30)
+          programNotify(socket, appointment.pop()!, -30)
         }
       }
 

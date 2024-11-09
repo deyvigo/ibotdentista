@@ -46,7 +46,8 @@ export const createImageDisponibility = async (data: AppointmentDisponibilityDTO
   hours.forEach((hour, index) => {
     if (hour !== '12:00:00') {
       if (dataHours.includes(hour)) {
-        const stateKey = data.find(({ day, hour }) => day === dayString && hour === hour)?.state
+        const stateKey = data.find(({ day, hour }) => hour === hour)?.state
+        console.log(stateKey)
         ctx.fillStyle = mapStateColors[stateKey as keyof typeof mapStateColors]
         const text = mapStates[stateKey as keyof typeof mapStates]
         const textWidth = ctx.measureText(text).width
